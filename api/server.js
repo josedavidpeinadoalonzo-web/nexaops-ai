@@ -1,194 +1,40 @@
 const express = require('express');
 const cors = require('cors');
-const jsonfile = require('jsonfile');
-const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'db.json');
-
 app.use(cors());
 app.use(express.json());
 
-// Helper: Read DB
-const readDB = () => jsonfile.readFileSync(DB_PATH);
-
-// Helper: Write DB
-const writeDB = (data) => jsonfile.writeFileSync(DB_PATH, data, { spaces: 2 });
-
-// Initialize DB if not exists
-const initDB = () => {
-    if (!require('fs').existsSync(DB_PATH)) {
-        writeDB({ clients: [], projects: [], tasks: [], income: [], agents: [], prompts: [] });
-    } else {
-        const db = readDB();
-        if (!db.agents) db.agents = [];
-        if (!db.prompts) db.prompts = [];
-        writeDB(db);
-    }
+let db = {
+    clients: [
+        { id: '1', name: 'Pizzeria Don Tito', type: 'restaurant', contact: 'Maria Perez', phone: '+58 412 1234567', email: 'maria@pizzeria.com', services: ['pedidos', 'whatsapp'], createdAt: '2026-04-20T10:00:00Z' },
+        { id: '2', name: 'Farmacia Central', type: 'pharmacy', contact: 'Carlos Rodriguez', phone: '+58 414 9876543', email: 'carlos@farmacia.com', services: ['inventario', 'crm'], createdAt: '2026-04-21T10:00:00Z' },
+        { id: '3', name: 'Barbería Style', type: 'barber', contact: 'Juan Martinez', phone: '+58 416 5551234', email: 'juan@barberia.com', services: ['reservas'], createdAt: '2026-04-22T10:00:00Z' }
+    ],
+    projects: [
+        { id: '101', clientId: '1', name: 'Pizzeria Don Tito', description: 'Sistema de pedidos + WhatsApp', type: 'automation', status: 'active', progress: 100, price: 150, createdAt: '2026-04-20T10:00:00Z' },
+        { id: '102', clientId: '2', name: 'Farmacia Central', description: 'Inventario + CRM', type: 'web', status: 'development', progress: 65, price: 300, createdAt: '2026-04-21T10:00:00Z' },
+        { id: '103', clientId: '3', name: 'Barbería Style', description: 'Web + Reservas', type: 'web', status: 'review', progress: 90, price: 120, createdAt: '2026-04-22T10:00:00Z' }
+    ],
+    tasks: [
+        { id: 't1', title: 'Terminar modulo de inventario', completed: false, projectId: '102', createdAt: '2026-04-22T10:00:00Z' },
+        { id: 't2', title: 'Revisar cambios Barbería', completed: false, projectId: '103', createdAt: '2026-04-22T10:00:00Z' }
+    ],
+    income: [
+        { id: 'i1', clientId: '1', description: 'Anticipo Pizzeria', amount: 75, date: '2026-04-20T10:00:00Z' },
+        { id: 'i2', description: 'Pago parcial Barbería', amount: 60, date: '2026-04-21T10:00:00Z' }
+    ],
+    agents: [],
+    prompts: []
 };
-initDB();
 
 // ==================== ROUTES ====================
 
-// Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-// ==================== CLIENTS ====================
-
-// Get all clients
-app.get('/api/clients', (req, res) => {
-    const db = readDB();
-    res.json(db.clients);
-});
-
-// Get single client
-app.get('/api/clients/:id', (req, res) => {
-    const db = readDB();
-    const client = db.clients.find(c => c.id === req.params.id);
-    if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
-    res.json(client);
-});
-
-// Create client
-app.post('/api/clients', (req, res) => {
-    const db = readDB();
-    const newClient = {
-        id: Date.now().toString(),
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    db.clients.push(newClient);
-    writeDB(db);
-    res.json(newClient);
-});
-
-// Update client
-app.put('/api/clients/:id', (req, res) => {
-    const db = readDB();
-    const index = db.clients.findIndex(c => c.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Cliente no encontrado' });
-    db.clients[index] = { ...db.clients[index], ...req.body };
-    writeDB(db);
-    res.json(db.clients[index]);
-});
-
-// ==================== PROJECTS ====================
-
-// Get all projects
-app.get('/api/projects', (req, res) => {
-    const db = readDB();
-    res.json(db.projects);
-});
-
-// Get projects by client
-app.get('/api/projects/client/:clientId', (req, res) => {
-    const db = readDB();
-    const projects = db.projects.filter(p => p.clientId === req.params.clientId);
-    res.json(projects);
-});
-
-// Get single project
-app.get('/api/projects/:id', (req, res) => {
-    const db = readDB();
-    const project = db.projects.find(p => p.id === req.params.id);
-    if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
-    res.json(project);
-});
-
-// Create project
-app.post('/api/projects', (req, res) => {
-    const db = readDB();
-    const newProject = {
-        id: Date.now().toString(),
-        status: 'pending',
-        progress: 0,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    db.projects.push(newProject);
-    writeDB(db);
-    res.json(newProject);
-});
-
-// Update project
-app.put('/api/projects/:id', (req, res) => {
-    const db = readDB();
-    const index = db.projects.findIndex(p => p.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Proyecto no encontrado' });
-    db.projects[index] = { ...db.projects[index], ...req.body };
-    writeDB(db);
-    res.json(db.projects[index]);
-});
-
-// ==================== TASKS ====================
-
-// Get all tasks
-app.get('/api/tasks', (req, res) => {
-    const db = readDB();
-    res.json(db.tasks);
-});
-
-// Create task
-app.post('/api/tasks', (req, res) => {
-    const db = readDB();
-    const newTask = {
-        id: Date.now().toString(),
-        completed: false,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    db.tasks.push(newTask);
-    writeDB(db);
-    res.json(newTask);
-});
-
-// Update task
-app.put('/api/tasks/:id', (req, res) => {
-    const db = readDB();
-    const index = db.tasks.findIndex(t => t.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
-    db.tasks[index] = { ...db.tasks[index], ...req.body };
-    writeDB(db);
-    res.json(db.tasks[index]);
-});
-
-// Delete task
-app.delete('/api/tasks/:id', (req, res) => {
-    const db = readDB();
-    db.tasks = db.tasks.filter(t => t.id !== req.params.id);
-    writeDB(db);
-    res.json({ success: true });
-});
-
-// ==================== INCOME ====================
-
-// Get all income
-app.get('/api/income', (req, res) => {
-    const db = readDB();
-    res.json(db.income);
-});
-
-// Add income
-app.post('/api/income', (req, res) => {
-    const db = readDB();
-    const newIncome = {
-        id: Date.now().toString(),
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    db.income.push(newIncome);
-    writeDB(db);
-    res.json(newIncome);
-});
-
-// ==================== STATS ====================
-
-// Get dashboard stats
 app.get('/api/stats', (req, res) => {
-    const db = readDB();
     const clients = db.clients.length;
     const projects = db.projects.length;
     const pendingTasks = db.tasks.filter(t => !t.completed).length;
@@ -197,53 +43,96 @@ app.get('/api/stats', (req, res) => {
         .filter(i => new Date(i.date).getMonth() === new Date().getMonth())
         .reduce((sum, i) => sum + (i.amount || 0), 0);
     
-    res.json({
-        clients,
-        projects,
-        pendingTasks,
-        totalIncome,
-        thisMonthIncome
-    });
+    res.json({ clients, projects, pendingTasks, totalIncome, thisMonthIncome });
 });
 
-// ==================== AGENTS ====================
-
-// Get all agents
-app.get('/api/agents', (req, res) => {
-    const db = readDB();
-    res.json(db.agents);
+app.get('/api/clients', (req, res) => res.json(db.clients));
+app.get('/api/clients/:id', (req, res) => {
+    const client = db.clients.find(c => c.id === req.params.id);
+    if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
+    res.json(client);
 });
 
-// Save agent config
+app.post('/api/clients', (req, res) => {
+    const newClient = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
+    db.clients.push(newClient);
+    res.json(newClient);
+});
+
+app.put('/api/clients/:id', (req, res) => {
+    const index = db.clients.findIndex(c => c.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: 'Cliente no encontrado' });
+    db.clients[index] = { ...db.clients[index], ...req.body };
+    res.json(db.clients[index]);
+});
+
+app.get('/api/projects', (req, res) => res.json(db.projects));
+app.get('/api/projects/client/:clientId', (req, res) => {
+    res.json(db.projects.filter(p => p.clientId === req.params.clientId));
+});
+app.get('/api/projects/:id', (req, res) => {
+    const project = db.projects.find(p => p.id === req.params.id);
+    if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    res.json(project);
+});
+
+app.post('/api/projects', (req, res) => {
+    const newProject = { id: Date.now().toString(), status: 'pending', progress: 0, ...req.body, createdAt: new Date().toISOString() };
+    db.projects.push(newProject);
+    res.json(newProject);
+});
+
+app.put('/api/projects/:id', (req, res) => {
+    const index = db.projects.findIndex(p => p.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    db.projects[index] = { ...db.projects[index], ...req.body };
+    res.json(db.projects[index]);
+});
+
+app.get('/api/tasks', (req, res) => res.json(db.tasks));
+
+app.post('/api/tasks', (req, res) => {
+    const newTask = { id: Date.now().toString(), completed: false, ...req.body, createdAt: new Date().toISOString() };
+    db.tasks.push(newTask);
+    res.json(newTask);
+});
+
+app.put('/api/tasks/:id', (req, res) => {
+    const index = db.tasks.findIndex(t => t.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
+    db.tasks[index] = { ...db.tasks[index], ...req.body };
+    res.json(db.tasks[index]);
+});
+
+app.delete('/api/tasks/:id', (req, res) => {
+    db.tasks = db.tasks.filter(t => t.id !== req.params.id);
+    res.json({ success: true });
+});
+
+app.get('/api/income', (req, res) => res.json(db.income));
+
+app.post('/api/income', (req, res) => {
+    const newIncome = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
+    db.income.push(newIncome);
+    res.json(newIncome);
+});
+
+app.get('/api/agents', (req, res) => res.json(db.agents));
+
 app.post('/api/agents', (req, res) => {
-    const db = readDB();
     const newAgent = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
     db.agents.push(newAgent);
-    writeDB(db);
     res.json(newAgent);
 });
 
-// Get agent prompts
 app.get('/api/agents/:name/prompts', (req, res) => {
-    const db = readDB();
-    const prompts = db.prompts.filter(p => p.agentName === req.params.name);
-    res.json(prompts);
+    res.json(db.prompts.filter(p => p.agentName === req.params.name));
 });
 
-// Save prompt
 app.post('/api/agents/:name/prompts', (req, res) => {
-    const db = readDB();
-    const newPrompt = {
-        id: Date.now().toString(),
-        agentName: req.params.name,
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
+    const newPrompt = { id: Date.now().toString(), agentName: req.params.name, ...req.body, createdAt: new Date().toISOString() };
     db.prompts.push(newPrompt);
-    writeDB(db);
     res.json(newPrompt);
 });
 
-app.listen(PORT, () => {
-    console.log(`NexaOps API running on http://localhost:${PORT}`);
-});
+module.exports = app;
