@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzeria Don Tito - Las Mejores Pizzas de la Ciudad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        body { font-family: 'Inter', sans-serif; }
+        .hero-bg {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+            url('https://images.unsplash.com/photo-1513104890138-247cfe698e08?w=1920');
+            background-size: cover;
+            background-position: center;
+        }
+        .menu-card:hover { transform: scale(1.02); }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+    <!-- Nav -->
+    <nav class="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur z-50 border-b border-gray-800">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-red-500">Pizzeria Don Tito</h1>
+            <div class="flex gap-6">
+                <a href="#menu" class="hover:text-red-400 transition-all">Menú</a>
+                <a href="#pedidos" class="hover:text-red-400 transition-all">Pedidos</a>
+                <a href="#contacto" class="hover:text-red-400 transition-all">Contacto</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-bg min-h-screen flex items-center justify-center">
+        <div class="text-center px-6">
+            <div class="mb-6">
+                <span class="px-4 py-2 rounded-full bg-red-500/20 text-red-400 text-sm">🍕 Desde 1998</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">Pizzeria Don Tito</h1>
+            <p class="text-xl text-gray-300 mb-8">Las mejores pizzas artesanales de la ciudad</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://wa.me/584121234567?text=Hola! Quiero hacer un pedido" target="_blank" class="px-8 py-4 rounded-full bg-green-600 hover:bg-green-500 font-semibold flex items-center justify-center gap-2">
+                    <span>📱</span> Pedir por WhatsApp
+                </a>
+                <a href="#menu" class="px-8 py-4 rounded-full border border-white hover:bg-white hover:text-gray-900 font-semibold transition-all">
+                    Ver Menú
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu -->
+    <section id="menu" class="py-24 px-6 bg-gray-900/50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4">Nuestro Menú</h2>
+            <p class="text-gray-400 text-center mb-12">Ingredientes frescos, masa artesanal</p>
+            
+            <!-- Categories -->
+            <div class="flex justify-center gap-4 mb-12">
+                <button onclick="displayMenu('all')" class="px-6 py-2 rounded-full bg-red-600">Todas</button>
+                <button onclick="displayMenu('clasicas')" class="px-6 py-2 rounded-full bg-gray-800 hover:bg-gray-700">Clásicas</button>
+                <button onclick="displayMenu('especiales')" class="px-6 py-2 rounded-full bg-gray-800 hover:bg-gray-700">Especiales</button>
+                <button onclick="displayMenu('bebidas')" class="px-6 py-2 rounded-full bg-gray-800 hover:bg-gray-700">Bebidas</button>
+            </div>
+            
+            <div id="menu-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Menu loaded by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Section -->
+    <section id="pedidos" class="py-24 px-6">
+        <div class="max-w-2xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-4">Haz tu Pedido</h2>
+            <p class="text-gray-400 mb-8">Llena el formulario y te contactamos por WhatsApp</p>
+            
+            <form id="order-form" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Nombre</label>
+                    <input type="text" id="customer-name" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-red-500 focus:outline-none" placeholder="Tu nombre">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Teléfono</label>
+                    <input type="tel" id="customer-phone" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-red-500 focus:outline-none" placeholder="+58 412 1234567">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Dirección</label>
+                    <input type="text" id="customer-address" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-red-500 focus:outline-none" placeholder="Calle, Ciudad">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Tu pedido</label>
+                    <textarea id="customer-order" rows="3" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-red-500 focus:outline-none" placeholder="2 Margarita, 1 Pepperoni, 1 Refresco..."></textarea>
+                </div>
+                <button type="button" onclick="submitOrder()" class="w-full py-4 rounded-full bg-green-600 hover:bg-green-500 font-semibold text-lg">
+                    Enviar Pedido por WhatsApp
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contacto" class="py-24 px-6 bg-gray-900/50">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-4">Encuéntranos</h2>
+            <div class="grid md:grid-cols-3 gap-8 mt-8">
+                <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                    <div class="text-4xl mb-4">📍</div>
+                    <h3 class="font-bold mb-2">Ubicación</h3>
+                    <p class="text-gray-400 text-sm">Av. Principal #123<br>Ciudad</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                    <div class="text-4xl mb-4">📱</div>
+                    <h3 class="font-bold mb-2">Teléfono</h3>
+                    <p class="text-gray-400 text-sm">+58 412 1234567</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                    <div class="text-4xl mb-4">⏰</div>
+                    <h3 class="font-bold mb-2">Horario</h3>
+                    <p class="text-gray-400 text-sm">Lun-Dom: 11am - 11pm</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 px-6 border-t border-gray-800 text-center">
+        <p class="text-gray-500 text-sm">© 2026 Pizzeria Don Tito | Desarrollado por <span class="text-indigo-400">NexaOps AI</span></p>
+    </footer>
+
+    <script>
+        const WHATSAPP_NUMBER = '584121234567';
+        let menuItems = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            menuItems = [
+                { id: 1, name: 'Margarita', desc: 'Salsa pomodoro, mozzarella, albahaca fresca', price: 8, cat: 'clasicas', emoji: '🍕' },
+                { id: 2, name: 'Pepperoni', desc: 'Salsa pomodoro, mozzarella, pepperoni crispy', price: 10, cat: 'clasicas', emoji: '🍕' },
+                { id: 3, name: 'Hawaiana', desc: 'Salsa pomodoro, mozzarella, jamón, piña', price: 10, cat: 'clasicas', emoji: '🍕' },
+                { id: 4, name: '4 Carnes', desc: 'Pepperoni, jamón, bacon, chorizo', price: 12, cat: 'especiales', emoji: '🍕' },
+                { id: 5, name: 'Vegetales', desc: 'Pimiento, cebolla, champiñones, aceitunas', price: 9, cat: 'especiales', emoji: '🥗' },
+                { id: 6, name: 'Napolitana', desc: 'Tomate, mozzarella, ajo, orégano', price: 9, cat: 'especiales', emoji: '🍕' },
+                { id: 7, name: 'Refresco 2L', desc: 'Coca-Cola, Pepsi, Sprite, Fanta', price: 2, cat: 'bebidas', emoji: '🥤' },
+                { id: 8, name: 'Jugo Natural', desc: 'Naranja, fresa, mango', price: 3, cat: 'bebidas', emoji: '🧃' },
+            ];
+            displayMenu('all');
+        });
+        
+        function displayMenu(category) {
+            const filtered = category === 'all' ? menuItems : menuItems.filter(item => item.cat === category);
+            
+            document.getElementById('menu-grid').innerHTML = filtered.map(item => `
+                <div class="menu-card p-6 rounded-2xl bg-gray-800/50 border border-gray-700 transition-all cursor-pointer">
+                    <div class="text-4xl mb-4">${item.emoji}</div>
+                    <h3 class="text-xl font-bold mb-2">${item.name}</h3>
+                    <p class="text-gray-400 text-sm mb-4">${item.desc}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-2xl font-bold text-red-400">$${item.price}</span>
+                        <button onclick="orderWhatsApp('${item.name}')" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-sm">+ Pedir</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.querySelectorAll('#menu .grid button').forEach(btn => {
+                btn.classList.remove('bg-red-600');
+                btn.classList.add('bg-gray-800');
+            });
+            event.target.classList.remove('bg-gray-800');
+            event.target.classList.add('bg-red-600');
+        }
+        
+        function orderWhatsApp(item) {
+            const message = `Hola! Quiero ordenar: ${item}`;
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+        
+        function submitOrder() {
+            const name = document.getElementById('customer-name').value;
+            const phone = document.getElementById('customer-phone').value;
+            const address = document.getElementById('customer-address').value;
+            const order = document.getElementById('customer-order').value;
+            
+            if (!name || !order) {
+                alert('Por favor completa al menos tu nombre y el pedido');
+                return;
+            }
+            
+            const message = `🍕 *Nuevo Pedido*\n\n*Nombre:* ${name}\n*Teléfono:* ${phone}\n*Dirección:* ${address}\n\n*Pedido:* ${order}`;
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+    </script>
+</body>
+</html>

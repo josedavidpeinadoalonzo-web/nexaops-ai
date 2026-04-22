@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaOps AI - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .card { transition: all 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+        .active { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-900 border-r border-gray-800 p-6 fixed h-full overflow-y-auto">
+            <div class="mb-10">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    NexaOps AI
+                </h1>
+                <p class="text-xs text-gray-500">Dashboard</p>
+            </div>
+            
+            <nav class="space-y-2">
+                <button onclick="showSection('overview')" id="btn-overview" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl active">
+                    <span>📊</span> Overview
+                </button>
+                <button onclick="showSection('clients')" id="btn-clients" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🏢</span> Clientes
+                </button>
+                <button onclick="showSection('projects')" id="btn-projects" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🛠️</span> Proyectos
+                </button>
+                <button onclick="showSection('agents')" id="btn-agents" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🤖</span> Agentes
+                </button>
+                <button onclick="showSection('income')" id="btn-income" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>💰</span> Ingresos
+                </button>
+                <button onclick="showSection('tasks')" id="btn-tasks" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>📅</span> Tareas
+                </button>
+                <button onclick="showSection('settings')" id="btn-settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>⚙️</span> Config
+                </button>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 p-8 ml-64">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 id="section-title" class="text-2xl font-bold">Overview</h2>
+                    <p class="text-gray-400">Resumen de tu empresa</p>
+                </div>
+                <button id="btn-add" onclick="showAddModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">
+                    + Nuevo
+                </button>
+            </header>
+            
+            <!-- Content Sections -->
+            <div id="section-content">
+                <!-- Overview -->
+                <div id="section-overview">
+                    <div id="stats-grid" class="grid grid-cols-4 gap-6 mb-8"></div>
+                    <h3 class="text-xl font-semibold mb-4">Proyectos Recientes</h3>
+                    <div id="recent-projects" class="space-y-3"></div>
+                </div>
+                
+                <!-- Clients -->
+                <div id="section-clients" class="hidden">
+                    <div id="clients-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Projects -->
+                <div id="section-projects" class="hidden">
+                    <div id="projects-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Agents -->
+                <div id="section-agents" class="hidden">
+                    <div id="agents-list" class="grid grid-cols-3 gap-6"></div>
+                </div>
+                
+                <!-- Income -->
+                <div id="section-income" class="hidden">
+                    <div id="income-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Tasks -->
+                <div id="section-tasks" class="hidden">
+                    <div id="tasks-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Settings -->
+                <div id="section-settings" class="hidden">
+                    <div class="max-w-2xl">
+                        <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700 mb-6">
+                            <h3 class="font-bold mb-4">Configuración de WhatsApp</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm text-gray-400 mb-2">Número de WhatsApp</label>
+                                    <input type="text" id="whatsapp-number" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="584121234567">
+                                </div>
+                                <button onclick="saveSettings()" class="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Guardar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                            <h3 class="font-bold mb-4">API del Sistema</h3>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">URL de la API</label>
+                                <input type="text" id="api-url" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="http://localhost:3000/api">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-md border border-gray-700 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-xl font-bold">Agregar</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <form id="add-form" class="space-y-4"></form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = localStorage.getItem('nexaops_api_url') || 'http://localhost:4000/api';
+        let currentSection = 'overview';
+        let clients = [];
+        let projects = [];
+        let tasks = [];
+        
+        const AGENTS = [
+            { name: 'Python Developer', file: 'python-developer.md', desc: 'Backend, APIs, data science', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','task','todowrite','question'] },
+            { name: 'Frontend Dev', file: 'frontend-dev.md', desc: 'React, Vue, interfaces', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','task','todowrite','question'] },
+            { name: 'Backend Dev', file: 'backend-dev.md', desc: 'APIs, microservices', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','codesearch','task','todowrite','question'] },
+            { name: 'Debug Agent', file: 'debug-agent.md', desc: 'Bug fixing, performance', mode: 'primary', tools: ['bash','read','grep','glob','websearch','codesearch','task','todowrite','question'] },
+            { name: 'Docs Writer', file: 'docs-writer.md', desc: 'Documentation', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','task','todowrite','question'] },
+            { name: 'Mobile Dev', file: 'mobile-developer.md', desc: 'iOS, Android, React Native', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','task','todowrite','question'] },
+            { name: 'Automation Dev', file: 'automation-developer.md', desc: 'Scripts, bots, scraping', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','task','todowrite','question'] },
+            { name: 'SaaS Architect', file: 'saas-architect.md', desc: 'Cloud architecture', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','codesearch','task','todowrite','question'] },
+            { name: 'Digital Marketing', file: 'digital-marketing.md', desc: 'SEO, content', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','codesearch','task','todowrite','question'] },
+            { name: 'DevOps Engineer', file: 'devops-engineer.md', desc: 'CI/CD, Docker', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','task','todowrite','question'] },
+            { name: 'Deploy Agent', file: 'deploy-agent.md', desc: 'Deploy websites', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','task','todowrite','question'] },
+            { name: 'Image Generator', file: 'image-generator.md', desc: 'Logos, banners', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','codesearch','task','todowrite','question'] },
+            { name: 'UI/UX Designer', file: 'ui-ux-designer.md', desc: 'User experience', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','task','todowrite','question'] },
+            { name: 'Project Manager', file: 'project-manager.md', desc: 'Planning, Agile', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','codesearch','task','todowrite','question'] },
+            { name: 'Orchestrator', file: 'orchestrator-agent.md', desc: 'Main coordinator', mode: 'primary', tools: ['bash','read','edit','glob','grep','webfetch','websearch','codesearch','task','todowrite','question'] },
+        ];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadData();
+        });
+        
+        async function loadData() {
+            await Promise.all([loadStats(), loadRecentProjects(), loadClients(), loadProjects(), loadIncome(), loadTasks(), loadAgents()]);
+        }
+        
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API_URL}/stats`);
+                if (!res.ok) throw new Error('API not available');
+                const data = await res.json();
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                        <p class="text-gray-400 text-sm">Clientes Activos</p>
+                        <p class="text-3xl font-bold mt-2">${data.clients}</p>
+                    </div>
+                    <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                        <p class="text-gray-400 text-sm">Proyectos</p>
+                        <p class="text-3xl font-bold mt-2">${data.projects}</p>
+                    </div>
+                    <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                        <p class="text-gray-400 text-sm">Este Mes</p>
+                        <p class="text-3xl font-bold mt-2">$${data.thisMonthIncome}</p>
+                    </div>
+                    <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                        <p class="text-gray-400 text-sm">Tareas Pendientes</p>
+                        <p class="text-3xl font-bold mt-2">${data.pendingTasks}</p>
+                    </div>
+                `;
+            } catch (e) {
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="col-span-4 p-6 rounded-2xl bg-yellow-500/20 border border-yellow-500/50 text-center">
+                        <p class="text-yellow-400">⚠️ API no disponible. Asegúrate de que el backend esté corriendo.</p>
+                        <p class="text-sm text-gray-400 mt-2">URL: ${API_URL}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function loadRecentProjects() {
+            try {
+                const res = await fetch(`${API_URL}/projects`);
+                const data = await res.json();
+                projects = data;
+                document.getElementById('recent-projects').innerHTML = data.slice(0, 5).map(p => `
+                    <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-semibold">${p.name}</h4>
+                            <p class="text-sm text-gray-400">${p.description}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full ${getStatusColor(p.status)} text-sm">${p.status}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('recent-projects').innerHTML = '<p class="text-gray-500">Sin datos</p>';
+            }
+        }
+        
+        async function loadClients() {
+            try {
+                const res = await fetch(`${API_URL}/clients`);
+                clients = await res.json();
+                document.getElementById('clients-list').innerHTML = clients.map(c => `
+                    <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700">
+                        <div class="flex justify-between">
+                            <div>
+                                <h4 class="font-semibold">${c.name}</h4>
+                                <p class="text-sm text-gray-400">${c.type} - ${c.contact}</p>
+                            </div>
+                            <button onclick="deleteItem('clients', '${c.id}')" class="text-red-400 hover:text-red-300">✕</button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">${c.phone}</p>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('clients-list').innerHTML = '<p class="text-gray-500">Sin datos</p>';
+            }
+        }
+        
+        async function loadProjects() {
+            try {
+                const res = await fetch(`${API_URL}/projects`);
+                projects = await res.json();
+                document.getElementById('projects-list').innerHTML = projects.map(p => `
+                    <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-semibold">${p.name}</h4>
+                                <p class="text-sm text-gray-400">${p.description}</p>
+                            </div>
+                            <button onclick="deleteItem('projects', '${p.id}')" class="text-red-400 hover:text-red-300">✕</button>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-400">Progreso</span>
+                                <span>${p.progress}%</span>
+                            </div>
+                            <div class="h-2 bg-gray-700 rounded-full">
+                                <div class="h-2 bg-indigo-500 rounded-full" style="width: ${p.progress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('projects-list').innerHTML = '<p class="text-gray-500">Sin datos</p>';
+            }
+        }
+        
+        function loadAgents() {
+            document.getElementById('agents-list').innerHTML = AGENTS.map(a => `
+                <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl">🤖</span>
+                        <div>
+                            <h4 class="font-semibold">${a.name}</h4>
+                            <p class="text-sm text-gray-400">${a.desc}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-xs text-gray-500">Archivo: ${a.file}</p>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        ${a.tools.map(t => `<span class="px-2 py-1 rounded text-xs bg-gray-700">${t}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function loadIncome() {
+            try {
+                const res = await fetch(`${API_URL}/income`);
+                const income = await res.json();
+                const total = income.reduce((sum, i) => sum + (i.amount || 0), 0);
+                document.getElementById('income-list').innerHTML = `
+                    <div class="p-6 rounded-2xl bg-green-500/20 border border-green-500/50 mb-6">
+                        <p class="text-gray-400">Total Ingresos</p>
+                        <p class="text-4xl font-bold text-green-400">$${total}</p>
+                    </div>
+                    ${income.map(i => `
+                        <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700 flex justify-between items-center">
+                            <span>${i.description}</span>
+                            <span class="text-green-400">$${i.amount}</span>
+                        </div>
+                    `).join('')}
+                `;
+            } catch (e) {
+                document.getElementById('income-list').innerHTML = '<p class="text-gray-500">Sin datos</p>';
+            }
+        }
+        
+        async function loadTasks() {
+            try {
+                const res = await fetch(`${API_URL}/tasks`);
+                tasks = await res.json();
+                document.getElementById('tasks-list').innerHTML = tasks.map(t => `
+                    <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)">
+                            <span class="${t.completed ? 'line-through text-gray-500' : ''}">${t.title}</span>
+                        </div>
+                        <button onclick="deleteItem('tasks', '${t.id}')" class="text-red-400 hover:text-red-300">✕</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                document.getElementById('tasks-list').innerHTML = '<p class="text-gray-500">Sin datos</p>';
+            }
+        }
+        
+        function showSection(section) {
+            document.querySelectorAll('[id^="section-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-400');
+            });
+            document.getElementById(`btn-${section}`).classList.add('active');
+            document.getElementById(`btn-${section}`).classList.remove('text-gray-400');
+            
+            const titles = {
+                overview: 'Overview', clients: 'Clientes', projects: 'Proyectos',
+                agents: 'Agentes', income: 'Ingresos', tasks: 'Tareas', settings: 'Configuración'
+            };
+            document.getElementById('section-title').textContent = titles[section];
+            currentSection = section;
+            
+            const sectionsWithAdd = ['clients', 'projects', 'tasks', 'income'];
+            document.getElementById('btn-add').classList.toggle('hidden', !sectionsWithAdd.includes(section));
+        }
+        
+        async function toggleTask(id, completed) {
+            await fetch(`${API_URL}/tasks/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed })
+            });
+            loadTasks();
+        }
+        
+        async function deleteItem(type, id) {
+            if (confirm('¿Eliminar?')) {
+                await fetch(`${API_URL}/${type}/${id}`, { method: 'DELETE' });
+                loadData();
+            }
+        }
+        
+        function showAddModal() {
+            const forms = {
+                clients: `
+                    <input type="text" name="name" placeholder="Nombre del negocio" required class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                    <select name="type" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                        <option value="restaurant">Restaurante</option>
+                        <option value="pharmacy">Farmacia</option>
+                        <option value="retail">Tienda</option>
+                        <option value="barber">Peluquería</option>
+                        <option value="other">Otro</option>
+                    </select>
+                    <input type="text" name="contact" placeholder="Nombre de contacto" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                    <input type="tel" name="phone" placeholder="WhatsApp" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                `,
+                projects: `
+                    <input type="text" name="name" placeholder="Nombre del proyecto" required class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                    <textarea name="description" placeholder="Descripción" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700"></textarea>
+                    <select name="type" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                        <option value="web">Web</option>
+                        <option value="mobile">App Mobile</option>
+                        <option value="automation">Automatización</option>
+                        <option value="marketing">Marketing</option>
+                    </select>
+                    <input type="number" name="price" placeholder="Precio $" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                `,
+                tasks: `
+                    <input type="text" name="title" placeholder="Descripción de la tarea" required class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                `,
+                income: `
+                    <input type="text" name="description" placeholder="Descripción" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                    <input type="number" name="amount" placeholder="Monto $" required class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                `
+            };
+            
+            document.getElementById('modal-title').textContent = `Agregar ${currentSection.slice(0, -1)}`;
+            document.getElementById('add-form').innerHTML = forms[currentSection];
+            document.getElementById('add-modal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('add-modal').classList.add('hidden');
+        }
+        
+        async function handleAddForm(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            await fetch(`${API_URL}/${currentSection}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            closeModal();
+            loadData();
+        }
+        
+        document.getElementById('add-form').addEventListener('submit', handleAddForm);
+        
+        function getStatusColor(status) {
+            return {
+                active: 'bg-green-500/20 text-green-400',
+                development: 'bg-yellow-500/20 text-yellow-400',
+                review: 'bg-blue-500/20 text-blue-400',
+                pending: 'bg-gray-500/20 text-gray-400'
+            }[status] || 'bg-gray-500/20 text-gray-400';
+        }
+        
+        function loadSettings() {
+            document.getElementById('whatsapp-number').value = localStorage.getItem('nexaops_whatsapp') || '';
+            document.getElementById('api-url').value = API_URL;
+        }
+        
+        function saveSettings() {
+            localStorage.setItem('nexaops_whatsapp', document.getElementById('whatsapp-number').value);
+            localStorage.setItem('nexaops_api_url', document.getElementById('api-url').value);
+            location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaOps AI - Work Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .card { transition: all 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+        .filter-btn.active { background: #4f46e5; }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-900 border-r border-gray-800 p-6 fixed h-full">
+            <div class="mb-10">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    NexaOps AI
+                </h1>
+                <p class="text-xs text-gray-500">Work Portal</p>
+            </div>
+            
+            <nav class="space-y-2">
+                <button onclick="filterProjects('all')" id="filter-all" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl active">
+                    <span>📋</span> Todos
+                </button>
+                <button onclick="filterProjects('web')" id="filter-web" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🌐</span> Webs
+                </button>
+                <button onclick="filterProjects('mobile')" id="filter-mobile" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>📱</span> Apps
+                </button>
+                <button onclick="filterProjects('automation')" id="filter-automation" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🤖</span> Automations
+                </button>
+                <button onclick="filterProjects('marketing')" id="filter-marketing" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>📣</span> Marketing
+                </button>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 p-8 ml-64">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold">Proyectos</h2>
+                    <p class="text-gray-400">Seguimiento de proyectos</p>
+                </div>
+                <div class="text-sm text-gray-500">
+                    Última actualización: <span id="last-update">-</span>
+                </div>
+            </header>
+            
+            <!-- Projects Grid -->
+            <div id="projects-grid" class="grid grid-cols-2 gap-6">
+                <!-- Projects loaded dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4000/api';
+        let allProjects = [];
+        let currentFilter = 'all';
+        
+        document.addEventListener('DOMContentLoaded', loadProjects);
+        
+        async function loadProjects() {
+            try {
+                const res = await fetch(`${API_URL}/projects`);
+                allProjects = await res.json();
+                displayProjects(allProjects);
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+            } catch (e) {
+                document.getElementById('projects-grid').innerHTML = `
+                    <div class="col-span-2 p-8 rounded-2xl bg-gray-800/50 border border-gray-700 text-center">
+                        <p class="text-gray-400">Conectando a la API...</p>
+                        <p class="text-sm text-gray-500 mt-2"> Asegúrate de que la API esté corriendo en http://localhost:3000</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function filterProjects(type) {
+            currentFilter = type;
+            
+            // Update filter buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-400');
+            });
+            document.getElementById(`filter-${type}`).classList.add('active');
+            document.getElementById(`filter-${type}`).classList.remove('text-gray-400');
+            
+            // Filter and display
+            const filtered = type === 'all' ? allProjects : allProjects.filter(p => p.type === type);
+            displayProjects(filtered);
+        }
+        
+        function displayProjects(projects) {
+            if (projects.length === 0) {
+                document.getElementById('projects-grid').innerHTML = `
+                    <div class="col-span-2 p-8 rounded-2xl bg-gray-800/50 border border-gray-700 text-center">
+                        <p class="text-gray-400">No hay proyectos en esta categoría</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            document.getElementById('projects-grid').innerHTML = projects.map(p => `
+                <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold">${p.name}</h3>
+                            <p class="text-sm text-gray-400">${p.description || 'Proyecto'}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full ${getStatusColor(p.status)} text-sm">${getStatusLabel(p.status)}</span>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-gray-400">Progreso</span>
+                            <span>${p.progress}%</span>
+                        </div>
+                        <div class="h-2 bg-gray-700 rounded-full">
+                            <div class="h-2 ${getProgressColor(p.progress)} rounded-full transition-all" style="width: ${p.progress}%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-400">
+                        <span>${getTypeLabel(p.type)}</span>
+                        <span>${p.price ? '$' + p.price : ''}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                active: 'bg-green-500/20 text-green-400',
+                development: 'bg-yellow-500/20 text-yellow-400',
+                review: 'bg-blue-500/20 text-blue-400',
+                pending: 'bg-gray-500/20 text-gray-400',
+                completed: 'bg-green-500/20 text-green-400'
+            };
+            return colors[status] || colors.pending;
+        }
+        
+        function getStatusLabel(status) {
+            const labels = {
+                active: 'Activo',
+                development: 'En desarrollo',
+                review: 'En revisión',
+                pending: 'Pendiente',
+                completed: 'Completado'
+            };
+            return labels[status] || status;
+        }
+        
+        function getTypeLabel(type) {
+            const labels = {
+                web: '🌐 Web',
+                mobile: '📱 App',
+                automation: '🤖 Automation',
+                marketing: '📣 Marketing'
+            };
+            return labels[type] || type;
+        }
+        
+        function getProgressColor(progress) {
+            if (progress >= 100) return 'bg-green-500';
+            if (progress >= 70) return 'bg-blue-500';
+            if (progress >= 30) return 'bg-yellow-500';
+            return 'bg-gray-500';
+        }
+    </script>
+</body>
+</html>

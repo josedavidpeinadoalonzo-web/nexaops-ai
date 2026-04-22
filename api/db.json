@@ -1,0 +1,110 @@
+{
+  "clients": [
+    {
+      "id": "1",
+      "name": "Pizzeria Don Tito",
+      "type": "restaurant",
+      "contact": "Maria Perez",
+      "phone": "+58 412 1234567",
+      "email": "maria@pizzeria.com",
+      "services": [
+        "pedidos",
+        "whatsapp"
+      ],
+      "createdAt": "2026-04-20T10:00:00Z"
+    },
+    {
+      "id": "2",
+      "name": "Farmacia Central",
+      "type": "pharmacy",
+      "contact": "Carlos Rodriguez",
+      "phone": "+58 414 9876543",
+      "email": "carlos@farmacia.com",
+      "services": [
+        "inventario",
+        "crm"
+      ],
+      "createdAt": "2026-04-21T10:00:00Z"
+    },
+    {
+      "id": "3",
+      "name": "Barbería Style",
+      "type": "barber",
+      "contact": "Juan Martinez",
+      "phone": "+58 416 5551234",
+      "email": "juan@barberia.com",
+      "services": [
+        "reservas"
+      ],
+      "createdAt": "2026-04-22T10:00:00Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "101",
+      "clientId": "1",
+      "name": "Pizzeria Don Tito",
+      "description": "Sistema de pedidos + WhatsApp",
+      "type": "automation",
+      "status": "active",
+      "progress": 100,
+      "price": 150,
+      "createdAt": "2026-04-20T10:00:00Z"
+    },
+    {
+      "id": "102",
+      "clientId": "2",
+      "name": "Farmacia Central",
+      "description": "Inventario + CRM",
+      "type": "web",
+      "status": "development",
+      "progress": 65,
+      "price": 300,
+      "createdAt": "2026-04-21T10:00:00Z"
+    },
+    {
+      "id": "103",
+      "clientId": "3",
+      "name": "Barbería Style",
+      "description": "Web + Reservas",
+      "type": "web",
+      "status": "review",
+      "progress": 90,
+      "price": 120,
+      "createdAt": "2026-04-22T10:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "title": "Terminar modulo de inventario",
+      "completed": false,
+      "projectId": "102",
+      "createdAt": "2026-04-22T10:00:00Z"
+    },
+    {
+      "id": "t2",
+      "title": "Revisar cambios Barbería",
+      "completed": false,
+      "projectId": "103",
+      "createdAt": "2026-04-22T10:00:00Z"
+    }
+  ],
+  "income": [
+    {
+      "id": "i1",
+      "clientId": "1",
+      "description": "Anticipo Pizzeria",
+      "amount": 75,
+      "date": "2026-04-20T10:00:00Z"
+    },
+    {
+      "id": "i2",
+      "description": "Pago parcial Barbería",
+      "amount": 60,
+      "date": "2026-04-21T10:00:00Z"
+    }
+  ],
+  "agents": [],
+  "prompts": []
+}
