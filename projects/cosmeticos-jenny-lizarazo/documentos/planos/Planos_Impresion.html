@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PLANOS ARQUITECTÓNICOS - Laboratorio Cosméticos Jenny Lizarazo</title>
+    <style>
+        @page {
+            size: A3 landscape;
+            margin: 1cm;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 11px; background: white; }
+        .page { width: 390mm; min-height: 277mm; margin: 0 auto; padding: 10mm; page-break-after: always; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
+        .header-left h1 { font-size: 16px; font-weight: bold; }
+        .header-left p { font-size: 10px; color: #666; }
+        .header-right { text-align: right; font-size: 10px; }
+        .title { text-align: center; font-size: 14px; font-weight: bold; margin: 10px 0; background: #f0f0f0; padding: 5px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .plan { border: 1px solid #333; padding: 10px; }
+        .plan-title { font-weight: bold; text-align: center; background: #e0e0e0; padding: 5px; margin-bottom: 10px; font-size: 12px; }
+        .room { position: relative; border: 1px solid #999; margin: 2px; padding: 3px; font-size: 8px; text-align: center; }
+        .rooms-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+        .legend { display: flex; gap: 15px; font-size: 9px; margin-top: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-box { width: 15px; height: 15px; border: 1px solid #333; }
+        .info-box { border: 1px solid #333; padding: 10px; margin-top: 10px; font-size: 10px; }
+        .info-box h3 { margin-bottom: 5px; }
+        .info-box table { width: 100%; border-collapse: collapse; }
+        .info-box td { border: 1px solid #999; padding: 3px; }
+        .print-btn { display: none; }
+        @media print { .print-btn { display: none; } }
+    </style>
+</head>
+<body>
+    <!-- PÁGINA 1: PLANTA ARQUITECTÓNICA PISO 1 -->
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>COSMÉTICOS JENNY LIZARAZO</h1>
+                <p>Medellín, Antioquia - Colombia</p>
+            </div>
+            <div class="header-right">
+                <strong>PLANO ARQUITECTÓNICO</strong><br>
+                Planta Primer Piso<br>
+                Escala: 1:50
+            </div>
+        </div>
+        
+        <div class="title">PLANTA ARQUITECTÓNICA - PRIMER PISO (Área Producción)</div>
+        
+        <div class="grid">
+            <div class="plan">
+                <div class="plan-title">PLANTA 8.00m x 12.00m = 96 m²</div>
+                <div style="border: 3px solid #333; padding: 10px; position: relative; height: 200px;">
+                    <!-- Fila 1 -->
+                    <div style="display: grid; grid-template-columns: 30% 40% 30%; height: 25%; border-bottom: 1px dashed #999;">
+                        <div class="room" style="background: #ffcc99;">PESELAJE<br>12m²</div>
+                        <div class="room" style="background: #99ccff;">PRODUCCIÓN<br>35m²</div>
+                        <div class="room" style="background: #99ff99;">ENVASADO<br>12m²</div>
+                    </div>
+                    <!-- Fila 2 -->
+                    <div style="display: grid; grid-template-columns: 35% 65%; height: 35%; border-bottom: 1px dashed #999;">
+                        <div class="room" style="background: #ffcc99;">ALMACENAMIENTO<br>15m²</div>
+                        <div class="room" style="background: #cccccc;">CIRCULACIÓN</div>
+                    </div>
+                    <!-- Fila 3 -->
+                    <div style="display: grid; grid-template-columns: repeat(8, 1fr); height: 20%;">
+                        <div class="room" style="background: #cccccc; grid-column: span 3;">PASILLO</div>
+                        <div class="room" style="background: #cccccc; grid-column: span 5;">ÁREA DE TRABAJO</div>
+                    </div>
+                    <!-- Fila 4 -->
+                    <div style="display: grid; grid-template-columns: 20% 80%; height: 20%;">
+                        <div class="room" style="background: #ff9999;">BAÑO</div>
+                        <div class="room" style="background: #cccccc;">CIRCULACIÓN</div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-box" style="background:#ffcc99;"></div> Pesaje</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#99ccff;"></div> Producción</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#99ff99;"></div> Envasado</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#ff9999;"></div> Sanitario</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#cccccc;"></div> Circulación</div>
+                </div>
+            </div>
+            
+            <div class="plan">
+                <div class="plan-title">DETALLE DE MOBILIARIO</div>
+                <div style="border: 1px solid #333; padding: 10px; height: 200px;">
+                    <p style="font-size: 9px; margin-bottom: 5px;"><strong>ÁREA DE PRODUCCIÓN (35m²)</strong></p>
+                    <p style="font-size: 8px;">• Mesa de trabajo: 2.0m x 0.8m (x2)<br>
+                    • Balanza digital: 0.4m x 0.4m<br>
+                    • Área de mezclado: 1.5m x 1.0m<br>
+                    • Estantería inoxidable: 1.2m x 0.4m (x4)</p>
+                    
+                    <p style="font-size: 9px; margin: 10px 0 5px 0;"><strong>ALMACENAMIENTO (15m²)</strong></p>
+                    <p style="font-size: 8px;">• Estanterías: 2.4m x 0.5m (x3)<br>
+                    • Nevera materias primas: 0.8m x 0.8m<br>
+                    • Área de muestreo: 1.0m x 1.0m</p>
+                    
+                    <p style="font-size: 9px; margin: 10px 0 5px 0;"><strong>ENVASADO (12m²)</strong></p>
+                    <p style="font-size: 8px;">• Mesa de envasado: 2.0m x 0.8m<br>
+                    • Selladora: 0.5m x 0.4m<br>
+                    • Etiquetadora: 0.4m x 0.3m</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>ESPECIFICACIONES BPM - ÁREA DE PRODUCCIÓN</h3>
+            <table>
+                <tr>
+                    <td>• Pisos: Cerámica antideslizante, resistente a químicos</td>
+                    <td>• Paredes: Bloque repellado con pintura epóxica</td>
+                </tr>
+                <tr>
+                    <td>• Iluminación: Mínimo 300 lux a nivel de trabajo</td>
+                    <td>• Ventilación: Sistema Split Duct con control de temperatura</td>
+                </tr>
+                <tr>
+                    <td>• Temperatura: 18-22°C controlada</td>
+                    <td>• Humedad: 45-55% controlada</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- PÁGINA 2: PLANTA ARQUITECTÓNICA PISO 2 -->
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>COSMÉTICOS JENNY LIZARAZO</h1>
+                <p>Medellín, Antioquia - Colombia</p>
+            </div>
+            <div class="header-right">
+                <strong>PLANO ARQUITECTÓNICO</strong><br>
+                Planta Segundo Piso<br>
+                Escala: 1:50
+            </div>
+        </div>
+        
+        <div class="title">PLANTA ARQUITECTÓNICA - SEGUNDO PISO (Área Administrativa)</div>
+        
+        <div class="grid">
+            <div class="plan">
+                <div class="plan-title">PLANTA 8.00m x 12.00m = 96 m²</div>
+                <div style="border: 3px solid #333; padding: 10px; position: relative; height: 200px;">
+                    <!-- Fila 1 -->
+                    <div style="display: grid; grid-template-columns: 35% 40% 25%; height: 30%; border-bottom: 1px dashed #999;">
+                        <div class="room" style="background: #ccccff;">OFICINA<br>18m²</div>
+                        <div class="room" style="background: #ffff99;">LAB. CALIDAD<br>20m²</div>
+                        <div class="room" style="background: #ff9999;">BAÑOS<br>12m²</div>
+                    </div>
+                    <!-- Fila 2 -->
+                    <div style="display: grid; grid-template-columns: 50% 50%; height: 40%; border-bottom: 1px dashed #999;">
+                        <div class="room" style="background: #99ccff;">SALA REUNIONES<br>15m²</div>
+                        <div class="room" style="background: #cccccc;">CIRCULACIÓN</div>
+                    </div>
+                    <!-- Fila 3 -->
+                    <div style="display: grid; grid-template-columns: repeat(6, 1fr); height: 30%;">
+                        <div class="room" style="background: #cccccc; grid-column: span 2;">PASILLO</div>
+                        <div class="room" style="background: #cccccc; grid-column: span 4;">ÁREA DE TRABAJO</div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-box" style="background:#ccccff;"></div> Oficina</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#ffff99;"></div> Lab. Calidad</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#99ccff;"></div> Reuniones</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#ff9999;"></div> Baños</div>
+                    <div class="legend-item"><div class="legend-box" style="background:#cccccc;"></div> Circulación</div>
+                </div>
+            </div>
+            
+            <div class="plan">
+                <div class="plan-title">DETALLE DE MOBILIARIO</div>
+                <div style="border: 1px solid #333; padding: 10px; height: 200px;">
+                    <p style="font-size: 9px; margin-bottom: 5px;"><strong>OFICINA PRINCIPAL (18m²)</strong></p>
+                    <p style="font-size: 8px;">• Escritorio: 1.6m x 0.8m<br>
+                    • Silla ergonómica: 1 unidad<br>
+                    • Archivador: 0.5m x 0.4m<br>
+                    • Computador: 1 unidad</p>
+                    
+                    <p style="font-size: 9px; margin: 10px 0 5px 0;"><strong>LABORATORIO CONTROL CALIDAD (20m²)</strong></p>
+                    <p style="font-size: 8px;">• Mesa de laboratorio: 1.5m x 0.6m (x2)<br>
+                    • Balanza analítica: 0.3m x 0.3m<br>
+                    • pHmetro: 0.2m x 0.2m<br>
+                    • Estantería reactivos: 0.8m x 0.3m</p>
+                    
+                    <p style="font-size: 9px; margin: 10px 0 5px 0;"><strong>SALA DE REUNIONES (15m²)</strong></p>
+                    <p style="font-size: 8px;">• Mesa reuniones: 2.0m x 1.0m<br>
+                    • Sillas: 6 unidades</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>ESPECIFICACIONES ÁREA ADMINISTRATIVA</h3>
+            <table>
+                <tr>
+                    <td>• Pisos: Porcelanato antideslizante</td>
+                    <td>• Paredes: Bloque repellado con pintura látex</td>
+                </tr>
+                <tr>
+                    <td>• Iluminación: LED empotrado 450 lux</td>
+                    <td>• Ventilación: Aire acondicionado split</td>
+                </tr>
+                <tr>
+                    <td>• Baños separados H/M</td>
+                    <td>• Vestidores con lockers</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- PÁGINA 3: FACHADA Y CORTE -->
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>COSMÉTICOS JENNY LIZARAZO</h1>
+                <p>Medellín, Antioquia - Colombia</p>
+            </div>
+            <div class="header-right">
+                <strong>FACHADA Y CORTE</strong><br>
+                Elevación Principal<br>
+                Escala: 1:50
+            </div>
+        </div>
+        
+        <div class="title">FACHADA PRINCIPAL - FACHADA MODERNA</div>
+        
+        <div style="border: 1px solid #333; padding: 15px; height: 180px; display: flex; justify-content: center; align-items: center;">
+            <div style="border: 2px solid #333; width: 95%; height: 150px; position: relative;">
+                <!-- Fachada moderna -->
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 70%; background: linear-gradient(135deg, #666 0%, #444 100%);">
+                    <!-- Ventanas piso 2 -->
+                    <div style="position: absolute; top: 10%; left: 10%; width: 20%; height: 35%; background: #99ccff; border: 2px solid #333;"></div>
+                    <div style="position: absolute; top: 10%; left: 40%; width: 20%; height: 35%; background: #99ccff; border: 2px solid #333;"></div>
+                    <div style="position: absolute; top: 10%; left: 70%; width: 20%; height: 35%; background: #99ccff; border: 2px solid #333;"></div>
+                </div>
+                <!-- piso 1 -->
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 25%; background: #555;">
+                    <!-- Puerta -->
+                    <div style="position: absolute; bottom: 0; left: 35%; width: 15%; height: 90%; background: #333; border: 2px solid #222;"></div>
+                    <!-- Ventanas piso 1 -->
+                    <div style="position: absolute; bottom: 10%; left: 10%; width: 15%; height: 70%; background: #99ccff; border: 2px solid #333;"></div>
+                    <div style="position: absolute; bottom: 10%; left: 75%; width: 15%; height: 70%; background: #99ccff; border: 2px solid #333;"></div>
+                </div>
+                <!-- Panel aluminio compuesto -->
+                <div style="position: absolute; top: 5%; right: 5%; width: 15%; height: 50%; background: linear-gradient(135deg, #888 0%, #666 100%); border: 2px solid #555;"></div>
+                <!-- Letrero -->
+                <div style="position: absolute; bottom: 28%; left: 10%; width: 20%; height: 8%; background: #333; display: flex; align-items: center; justify-content: center;">
+                    <span style="color: white; font-size: 8px; font-weight: bold;">COSMÉTICOS</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+            <div class="plan">
+                <div class="plan-title">CORTE A-A' (Vertical)</div>
+                <div style="border: 2px solid #333; padding: 10px; height: 120px;">
+                    <div style="border: 1px solid #333; height: 100%; display: flex; flex-direction: column;">
+                        <!-- Cubierta -->
+                        <div style="height: 15%; background: #666; border-bottom: 2px solid #333; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 8px;">CUBIERTA - TECHO DECK</span>
+                        </div>
+                        <!-- Nivel 2 -->
+                        <div style="height: 40%; background: #ddd; border-bottom: 2px solid #333; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 8px;">PISO 2 - h=3.00m</span>
+                        </div>
+                        <!-- Nivel 1 -->
+                        <div style="height: 40%; background: #ccc; border-bottom: 2px solid #333; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 8px;">PISO 1 - h=3.00m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="plan">
+                <div class="plan-title">ESPECIFICACIONES FACHADA</div>
+                <div style="border: 1px solid #333; padding: 10px; font-size: 9px;">
+                    <p><strong>Panel de aluminio compuesto:</strong> 4mm espesor</p>
+                    <p><strong>Vidrio reflectivo:</strong> 6mm templado</p>
+                    <p><strong>Iluminación LED:</strong> Empotrada en panel</p>
+                    <p><strong>Puerta automática:</strong> 1.2m x 2.1m</p>
+                    <p><strong>Ventanas:</strong> Aluminum con vidrio reflectivo</p>
+                    <p><strong>Acabado:</strong> Gris oscuro profesional</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box" style="margin-top: 15px;">
+            <h3>ACABADOS EXTERIORES</h3>
+            <table>
+                <tr>
+                    <td>• Panel de aluminio compuesto - Acabado gris metálico</td>
+                    <td>• Ventanería de aluminio con vidrio reflectivo 6mm</td>
+                </tr>
+                <tr>
+                    <td>• Iluminación LED empotrada en fachada</td>
+                    <td>• Puerta automática de cristal templado</td>
+                </tr>
+                <tr>
+                    <td>• Señalización corporativa en acero inoxidable</td>
+                    <td>• Altura total: 6.50m (incluye cubierta)</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- PÁGINA 4: PLANO ESTRUCTURAL -->
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <h1>COSMÉTICOS JENNY LIZARAZO</h1>
+                <p>Medellín, Antioquia - Colombia</p>
+            </div>
+            <div class="header-right">
+                <strong>PLANO ESTRUCTURAL</strong><br>
+                Planta de Cimentación y Entrepiso<br>
+                Escala: 1:50
+            </div>
+        </div>
+        
+        <div class="title">PLANO ESTRUCTURAL - CIMIENTACIÓN Y COLUMNAS</div>
+        
+        <div class="grid">
+            <div class="plan">
+                <div class="plan-title">CIMENTACIÓN - ZAPATAS Y VIGAS DE AMARRE</div>
+                <div style="border: 2px solid #333; padding: 10px; height: 200px; position: relative;">
+                    <!-- Zapata -->
+                    <div style="position: absolute; top: 10%; left: 10%; width: 15%; height: 20%; background: #cc9933; border: 1px solid #996600;"></div>
+                    <div style="position: absolute; top: 10%; right: 10%; width: 15%; height: 20%; background: #cc9933; border: 1px solid #996600;"></div>
+                    <div style="position: absolute; bottom: 10%; left: 10%; width: 15%; height: 20%; background: #cc9933; border: 1px solid #996600;"></div>
+                    <div style="position: absolute; bottom: 10%; right: 10%; width: 15%; height: 20%; background: #cc9933; border: 1px solid #996600;"></div>
+                    <div style="position: absolute; bottom: 30%; left: 40%; width: 15%; height: 20%; background: #cc9933; border: 1px solid #996600;"></div>
+                    
+                    <!-- Vigas de amarre -->
+                    <div style="position: absolute; top: 20%; left: 25%; width: 50%; height: 5%; background: #666;"></div>
+                    <div style="position: absolute; bottom: 20%; left: 25%; width: 50%; height: 5%; background: #666;"></div>
+                    
+                    <!-- Dimensiones -->
+                    <div style="position: absolute; bottom: 5%; right: 5%; font-size: 8px;">
+                        <p>Z1: 1.70m x 1.70m</p>
+                        <p>VA: 30x40cm</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="plan">
+                <div class="plan-title">UBICACIÓN DE COLUMNAS (Planta)</div>
+                <div style="border: 2px solid #333; padding: 10px; height: 200px;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; height: 100%;">
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center; background: #999;">C1<br>30x30</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;">V-24x40</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center; background: #999;">C2<br>30x30</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;">V-24x40</div>
+                        
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;">V-24x40</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;"></div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;">V-24x40</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;"></div>
+                        
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center; background: #999;">C3<br>30x30</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;">V-24x40</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center; background: #999;">C4<br>30x30</div>
+                        <div style="border: 2px solid #333; display: flex; align-items: center; justify-content: center;">V-24x40</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>ESPECIFICACIONES ESTRUCTURALES (NSR-10)</h3>
+            <table>
+                <tr>
+                    <td>• Concreto: f'c = 21 MPa (210 kg/cm²)</td>
+                    <td>• Acero: Fy = 420 MPa (4200 kg/cm²)</td>
+                </tr>
+                <tr>
+                    <td>• Columnas: 30x30cm con 6φ 1/2"</td>
+                    <td>• Vigas: 24x40cm con 3φ 1/2" + estribos φ3/8"@15cm</td>
+                </tr>
+                <tr>
+                    <td>• Zapatas: 1.70m x 1.70m, h=30cm</td>
+                    <td>• Losa: Viguetas + bovedilla H=25cm</td>
+                </tr>
+                <tr>
+                    <td>• Cimentación: Zapatas aisladas conectadas</td>
+                    <td>• Capacidad portante del suelo: 15 ton/m²</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Leyenda general -->
+    <div style="position: fixed; bottom: 10px; left: 10px; right: 10px; border-top: 1px solid #333; padding-top: 5px; font-size: 8px; display: flex; justify-content: space-between;">
+        <span>Elaborado: NexaOps AI - Civil Engineer Agent | Fecha: 22/04/2026</span>
+        <span>Página 4 de 4</span>
+    </div>
+
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
