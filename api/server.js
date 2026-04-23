@@ -20,6 +20,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://nexaops-ai.vercel.app',
   'https://nexaops-ai-admin.vercel.app',
+  'https://admin-nexaops-ai.vercel.app',
   'https://admin.nexaops.com'
 ];
 app.use(cors({
