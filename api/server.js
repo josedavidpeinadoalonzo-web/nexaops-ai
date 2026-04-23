@@ -18,7 +18,9 @@ const allowedOrigins = [
   'http://127.0.0.1:5500', 
   'http://localhost:5500', 
   'http://localhost:3000',
-  'https://nexaops.tu-dominio.com' // <-- Cambiar por tu dominio real si tienes uno
+  'https://nexaops-ai.vercel.app',
+  'https://nexaops-ai-admin.vercel.app',
+  'https://admin.nexaops.com'
 ];
 app.use(cors({
   origin: function (origin, callback) {

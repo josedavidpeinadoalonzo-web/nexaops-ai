@@ -1,4 +1,4 @@
-const API_URL = localStorage.getItem('nexaops_api_url') || 'https://api-virid-six-51.vercel.app/api';
+const API_URL = localStorage.getItem('nexaops_api_url') || 'https://nexaops-ai.vercel.app/api';
 let currentSection = 'overview';
 let clients = [];
 let projects = [];
