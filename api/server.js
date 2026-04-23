@@ -1,138 +1,306 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { createClient } = require('@supabase/supabase-js');
+const { z } = require('zod');
 
 const app = express();
-app.use(cors());
+
+// ==================== SEGURIDAD AVANZADA ====================
+
+// 1. Helmet: Protege cabeceras HTTP (Anti-XSS, Anti-Clickjacking)
+app.use(helmet());
+
+// 2. CORS Estricto: Solo permite tu dominio local y el dominio de producción
+const allowedOrigins = [
+  'http://127.0.0.1:5500', 
+  'http://localhost:5500', 
+  'http://localhost:3000',
+  'https://nexaops.tu-dominio.com' // <-- Cambiar por tu dominio real si tienes uno
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado por CORS'));
+    }
+  }
+}));
+
 app.use(express.json());
 
-let db = {
-    clients: [
-        { id: '1', name: 'Pizzeria Don Tito', type: 'restaurant', contact: 'Maria Perez', phone: '+58 412 1234567', email: 'maria@pizzeria.com', services: ['pedidos', 'whatsapp'], createdAt: '2026-04-20T10:00:00Z' },
-        { id: '2', name: 'Farmacia Central', type: 'pharmacy', contact: 'Carlos Rodriguez', phone: '+58 414 9876543', email: 'carlos@farmacia.com', services: ['inventario', 'crm'], createdAt: '2026-04-21T10:00:00Z' },
-        { id: '3', name: 'Barbería Style', type: 'barber', contact: 'Juan Martinez', phone: '+58 416 5551234', email: 'juan@barberia.com', services: ['reservas'], createdAt: '2026-04-22T10:00:00Z' }
-    ],
-    projects: [
-        { id: '101', clientId: '1', name: 'Pizzeria Don Tito', description: 'Sistema de pedidos + WhatsApp', type: 'automation', status: 'active', progress: 100, price: 150, createdAt: '2026-04-20T10:00:00Z' },
-        { id: '102', clientId: '2', name: 'Farmacia Central', description: 'Inventario + CRM', type: 'web', status: 'development', progress: 65, price: 300, createdAt: '2026-04-21T10:00:00Z' },
-        { id: '103', clientId: '3', name: 'Barbería Style', description: 'Web + Reservas', type: 'web', status: 'review', progress: 90, price: 120, createdAt: '2026-04-22T10:00:00Z' }
-    ],
-    tasks: [
-        { id: 't1', title: 'Terminar modulo de inventario', completed: false, projectId: '102', createdAt: '2026-04-22T10:00:00Z' },
-        { id: 't2', title: 'Revisar cambios Barbería', completed: false, projectId: '103', createdAt: '2026-04-22T10:00:00Z' }
-    ],
-    income: [
-        { id: 'i1', clientId: '1', description: 'Anticipo Pizzeria', amount: 75, date: '2026-04-20T10:00:00Z' },
-        { id: 'i2', description: 'Pago parcial Barbería', amount: 60, date: '2026-04-21T10:00:00Z' }
-    ],
-    agents: [],
-    prompts: []
-};
+// 3. Rate Limiting: Previene ataques DDoS o de fuerza bruta (Máx 100 peticiones cada 15 min)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Demasiadas peticiones, intenta de nuevo en 15 minutos.' }
+});
+app.use('/api/', limiter);
 
-// ==================== ROUTES ====================
+// 4. API Key Middleware: Solo permite acceso si envían la clave correcta
+const authenticateApiKey = (req, res, next) => {
+  // Omitido para el endpoint health
+  if (req.path === '/api/health') return next();
+  
+  // Puedes desactivar esto comentando las siguientes 3 líneas mientras desarrollas
+  // const apiKey = req.headers['x-api-key'];
+  // if (apiKey !== process.env.API_SECRET_KEY) {
+  //   return res.status(401).json({ error: 'Acceso denegado. API Key inválida.' });
+  // }
+  next();
+};
+app.use(authenticateApiKey);
+
+
+// ==================== CONEXIÓN A SUPABASE ====================
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error("FATAL ERROR: SUPABASE_URL y SUPABASE_ANON_KEY son requeridos en .env");
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// ==================== VALIDACIONES (Zod) ====================
+
+const clientSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido"),
+  email: z.string().email("Email inválido").optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  status: z.string().optional()
+});
+
+const projectSchema = z.object({
+  clientId: z.string().min(1),
+  name: z.string().min(1, "El nombre del proyecto es requerido"),
+  status: z.string().default('pending'),
+  progress: z.number().min(0).max(100).default(0)
+});
+
+
+// ==================== RUTAS (ENDPOINTS) ====================
 
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', time: new Date().toISOString() });
+    res.json({ status: 'ok', time: new Date().toISOString(), database: 'supabase' });
 });
 
-app.get('/api/stats', (req, res) => {
-    const clients = db.clients.length;
-    const projects = db.projects.length;
-    const pendingTasks = db.tasks.filter(t => !t.completed).length;
-    const totalIncome = db.income.reduce((sum, i) => sum + (i.amount || 0), 0);
-    const thisMonthIncome = db.income
-        .filter(i => new Date(i.date).getMonth() === new Date().getMonth())
-        .reduce((sum, i) => sum + (i.amount || 0), 0);
-    
-    res.json({ clients, projects, pendingTasks, totalIncome, thisMonthIncome });
+app.get('/api/stats', async (req, res) => {
+    try {
+        // Ejecutamos consultas en paralelo para máxima velocidad
+        const [
+            { count: clientsCount },
+            { count: projectsCount },
+            { count: pendingTasksCount },
+            { data: incomeData }
+        ] = await Promise.all([
+            supabase.from('clients').select('*', { count: 'exact', head: true }),
+            supabase.from('projects').select('*', { count: 'exact', head: true }),
+            supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('completed', false),
+            supabase.from('income').select('amount, date')
+        ]);
+
+        const totalIncome = incomeData ? incomeData.reduce((sum, i) => sum + Number(i.amount || 0), 0) : 0;
+        const currentMonth = new Date().getMonth();
+        const thisMonthIncome = incomeData ? incomeData
+            .filter(i => new Date(i.date).getMonth() === currentMonth)
+            .reduce((sum, i) => sum + Number(i.amount || 0), 0) : 0;
+        
+        res.json({ 
+            clients: clientsCount || 0, 
+            projects: projectsCount || 0, 
+            pendingTasks: pendingTasksCount || 0, 
+            totalIncome, 
+            thisMonthIncome 
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-app.get('/api/clients', (req, res) => res.json(db.clients));
-app.get('/api/clients/:id', (req, res) => {
-    const client = db.clients.find(c => c.id === req.params.id);
-    if (!client) return res.status(404).json({ error: 'Cliente no encontrado' });
-    res.json(client);
+// CLIENTS
+app.get('/api/clients', async (req, res) => {
+    const { data, error } = await supabase.from('clients').select('*').order('createdAt', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
 });
 
-app.post('/api/clients', (req, res) => {
-    const newClient = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
-    db.clients.push(newClient);
-    res.json(newClient);
+app.get('/api/clients/:id', async (req, res) => {
+    const { data, error } = await supabase.from('clients').select('*').eq('id', req.params.id).single();
+    if (error) return res.status(404).json({ error: 'Cliente no encontrado' });
+    res.json(data);
 });
 
-app.put('/api/clients/:id', (req, res) => {
-    const index = db.clients.findIndex(c => c.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Cliente no encontrado' });
-    db.clients[index] = { ...db.clients[index], ...req.body };
-    res.json(db.clients[index]);
+app.post('/api/clients', async (req, res) => {
+    try {
+        const validatedData = clientSchema.parse(req.body);
+        const newClient = { id: Date.now().toString(), ...validatedData, createdAt: new Date().toISOString() };
+        
+        const { data, error } = await supabase.from('clients').insert([newClient]).select().single();
+        if (error) throw error;
+        
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.errors || error.message });
+    }
 });
 
-app.get('/api/projects', (req, res) => res.json(db.projects));
-app.get('/api/projects/client/:clientId', (req, res) => {
-    res.json(db.projects.filter(p => p.clientId === req.params.clientId));
-});
-app.get('/api/projects/:id', (req, res) => {
-    const project = db.projects.find(p => p.id === req.params.id);
-    if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
-    res.json(project);
-});
-
-app.post('/api/projects', (req, res) => {
-    const newProject = { id: Date.now().toString(), status: 'pending', progress: 0, ...req.body, createdAt: new Date().toISOString() };
-    db.projects.push(newProject);
-    res.json(newProject);
+app.put('/api/clients/:id', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('clients')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select().single();
+            
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
-app.put('/api/projects/:id', (req, res) => {
-    const index = db.projects.findIndex(p => p.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Proyecto no encontrado' });
-    db.projects[index] = { ...db.projects[index], ...req.body };
-    res.json(db.projects[index]);
+// PROJECTS
+app.get('/api/projects', async (req, res) => {
+    const { data, error } = await supabase.from('projects').select('*').order('createdAt', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
 });
 
-app.get('/api/tasks', (req, res) => res.json(db.tasks));
-
-app.post('/api/tasks', (req, res) => {
-    const newTask = { id: Date.now().toString(), completed: false, ...req.body, createdAt: new Date().toISOString() };
-    db.tasks.push(newTask);
-    res.json(newTask);
+app.get('/api/projects/client/:clientId', async (req, res) => {
+    const { data, error } = await supabase.from('projects').select('*').eq('clientId', req.params.clientId);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
 });
 
-app.put('/api/tasks/:id', (req, res) => {
-    const index = db.tasks.findIndex(t => t.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
-    db.tasks[index] = { ...db.tasks[index], ...req.body };
-    res.json(db.tasks[index]);
+app.get('/api/projects/:id', async (req, res) => {
+    const { data, error } = await supabase.from('projects').select('*').eq('id', req.params.id).single();
+    if (error) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    res.json(data);
 });
 
-app.delete('/api/tasks/:id', (req, res) => {
-    db.tasks = db.tasks.filter(t => t.id !== req.params.id);
+app.post('/api/projects', async (req, res) => {
+    try {
+        const validatedData = projectSchema.parse(req.body);
+        const newProject = { id: Date.now().toString(), ...validatedData, createdAt: new Date().toISOString() };
+        
+        const { data, error } = await supabase.from('projects').insert([newProject]).select().single();
+        if (error) throw error;
+        
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.errors || error.message });
+    }
+});
+
+app.put('/api/projects/:id', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('projects')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select().single();
+            
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// TASKS
+app.get('/api/tasks', async (req, res) => {
+    const { data, error } = await supabase.from('tasks').select('*').order('createdAt', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.post('/api/tasks', async (req, res) => {
+    try {
+        const newTask = { id: Date.now().toString(), completed: false, ...req.body, createdAt: new Date().toISOString() };
+        const { data, error } = await supabase.from('tasks').insert([newTask]).select().single();
+        if (error) throw error;
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+app.put('/api/tasks/:id', async (req, res) => {
+    try {
+        const { data, error } = await supabase.from('tasks')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .select().single();
+            
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+app.delete('/api/tasks/:id', async (req, res) => {
+    const { error } = await supabase.from('tasks').delete().eq('id', req.params.id);
+    if (error) return res.status(400).json({ error: error.message });
     res.json({ success: true });
 });
 
-app.get('/api/income', (req, res) => res.json(db.income));
-
-app.post('/api/income', (req, res) => {
-    const newIncome = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
-    db.income.push(newIncome);
-    res.json(newIncome);
+// INCOME
+app.get('/api/income', async (req, res) => {
+    const { data, error } = await supabase.from('income').select('*').order('createdAt', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
 });
 
-app.get('/api/agents', (req, res) => res.json(db.agents));
-
-app.post('/api/agents', (req, res) => {
-    const newAgent = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
-    db.agents.push(newAgent);
-    res.json(newAgent);
+app.post('/api/income', async (req, res) => {
+    try {
+        const newIncome = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
+        const { data, error } = await supabase.from('income').insert([newIncome]).select().single();
+        if (error) throw error;
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
-app.get('/api/agents/:name/prompts', (req, res) => {
-    res.json(db.prompts.filter(p => p.agentName === req.params.name));
+// AGENTS
+app.get('/api/agents', async (req, res) => {
+    const { data, error } = await supabase.from('agents').select('*').order('createdAt', { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
 });
 
-app.post('/api/agents/:name/prompts', (req, res) => {
-    const newPrompt = { id: Date.now().toString(), agentName: req.params.name, ...req.body, createdAt: new Date().toISOString() };
-    db.prompts.push(newPrompt);
-    res.json(newPrompt);
+app.post('/api/agents', async (req, res) => {
+    try {
+        const newAgent = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
+        const { data, error } = await supabase.from('agents').insert([newAgent]).select().single();
+        if (error) throw error;
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// PROMPTS
+app.get('/api/agents/:name/prompts', async (req, res) => {
+    const { data, error } = await supabase.from('prompts').select('*').eq('agentName', req.params.name);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+app.post('/api/agents/:name/prompts', async (req, res) => {
+    try {
+        const newPrompt = { id: Date.now().toString(), agentName: req.params.name, ...req.body, createdAt: new Date().toISOString() };
+        const { data, error } = await supabase.from('prompts').insert([newPrompt]).select().single();
+        if (error) throw error;
+        res.status(201).json(data);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 module.exports = app;

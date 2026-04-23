@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaOps AI - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .card { transition: all 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+        .active { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-900 border-r border-gray-800 p-6 fixed h-full overflow-y-auto">
+            <div class="mb-10">
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    NexaOps AI
+                </h1>
+                <p class="text-xs text-gray-500">Dashboard</p>
+            </div>
+            
+            <nav class="space-y-2">
+                <button onclick="showSection('overview')" id="btn-overview" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl active">
+                    <span>📊</span> Overview
+                </button>
+                <button onclick="showSection('clients')" id="btn-clients" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🏢</span> Clientes
+                </button>
+                <button onclick="showSection('projects')" id="btn-projects" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🛠️</span> Proyectos
+                </button>
+                <button onclick="showSection('agents')" id="btn-agents" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>🤖</span> Agentes
+                </button>
+                <a href="portal.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-400 hover:bg-indigo-900/30">
+                    <span>💬</span> Agent Portal
+                </a>
+                <button onclick="showSection('income')" id="btn-income" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>💰</span> Ingresos
+                </button>
+                <button onclick="showSection('tasks')" id="btn-tasks" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>📅</span> Tareas
+                </button>
+                <button onclick="showSection('settings')" id="btn-settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800">
+                    <span>⚙️</span> Config
+                </button>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 p-8 ml-64">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 id="section-title" class="text-2xl font-bold">Overview</h2>
+                    <p class="text-gray-400">Resumen de tu empresa</p>
+                </div>
+                <button id="btn-add" onclick="showAddModal()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">
+                    + Nuevo
+                </button>
+            </header>
+            
+            <!-- Content Sections -->
+            <div id="section-content">
+                <!-- Overview -->
+                <div id="section-overview">
+                    <div id="stats-grid" class="grid grid-cols-4 gap-6 mb-8"></div>
+                    <h3 class="text-xl font-semibold mb-4">Proyectos Recientes</h3>
+                    <div id="recent-projects" class="space-y-3"></div>
+                </div>
+                
+                <!-- Clients -->
+                <div id="section-clients" class="hidden">
+                    <div id="clients-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Projects -->
+                <div id="section-projects" class="hidden">
+                    <div id="projects-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Agents -->
+                <div id="section-agents" class="hidden">
+                    <div id="agents-list" class="grid grid-cols-3 gap-6"></div>
+                </div>
+                
+                <!-- Income -->
+                <div id="section-income" class="hidden">
+                    <div id="income-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Tasks -->
+                <div id="section-tasks" class="hidden">
+                    <div id="tasks-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- Settings -->
+                <div id="section-settings" class="hidden">
+                    <div class="max-w-2xl">
+                        <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700 mb-6">
+                            <h3 class="font-bold mb-4">Configuración de WhatsApp</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm text-gray-400 mb-2">Número de WhatsApp</label>
+                                    <input type="text" id="whatsapp-number" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="584121234567">
+                                </div>
+                                <button onclick="saveSettings()" class="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Guardar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 rounded-2xl bg-gray-800/50 border border-gray-700">
+                            <h3 class="font-bold mb-4">API del Sistema</h3>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">URL de la API</label>
+                                <input type="text" id="api-url" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="http://localhost:3000/api">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-md border border-gray-700 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-xl font-bold">Agregar</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <form id="add-form" class="space-y-4"></form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

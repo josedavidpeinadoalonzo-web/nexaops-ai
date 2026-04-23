@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaOps AI - Agent Portal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .agent-card { transition: all 0.2s; }
+        .agent-card:hover { transform: translateY(-2px); }
+        .chat-message pre { max-width: 100%; overflow-x: auto !important; }
+        .chat-message code { word-break: break-all; white-space: pre-wrap !important; }
+        .typing { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+    <div class="flex h-screen">
+        <!-- Sidebar: Agent List -->
+        <aside class="w-80 bg-gray-900 border-r border-gray-800 flex flex-col">
+            <div class="p-6 border-b border-gray-800">
+                <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    NexaOps Agents
+                </h1>
+                <p class="text-xs text-gray-500">Centro de comandos IA</p>
+                <a href="index.html" class="mt-4 inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+                    <span>⬅️</span> Volver al Dashboard
+                </a>
+            </div>
+            
+            <div class="p-4">
+                <input type="text" id="search-agents" placeholder="Buscar agente..." 
+                    class="w-full px-4 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm"
+                    oninput="filterAgents(this.value)">
+            </div>
+            
+            <div id="agents-list" class="flex-1 overflow-y-auto p-4 space-y-2">
+                <!-- Agents loaded by JS -->
+            </div>
+            
+            <div class="p-4 border-t border-gray-800">
+                <button onclick="showNewAgentModal()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm">
+                    + Crear Agente
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main: Chat Area -->
+        <main class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header id="chat-header" class="p-4 border-b border-gray-800 flex justify-between items-center">
+                <div>
+                    <h2 id="selected-agent-name" class="font-bold">Selecciona un agente</h2>
+                    <p id="selected-agent-desc" class="text-sm text-gray-400"></p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-run" onclick="runAgent()" disabled
+                        class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        ▶ Ejecutar
+                    </button>
+                    <button onclick="saveAgentConfig()" class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600">
+                        💾 Guardar
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto bg-gray-950">
+                <div class="text-center text-gray-500 py-16">
+                    <div class="text-6xl mb-4 opacity-50">🤖</div>
+                    <p class="text-lg">Selecciona un agente en el menú lateral</p>
+                </div>
+            </div>
+            
+            <!-- Prompt Input -->
+            <div class="p-6 bg-gray-950">
+                <div class="max-w-4xl mx-auto flex flex-col relative bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl focus-within:border-gray-500 transition-colors">
+                    <textarea id="prompt-input" rows="3" placeholder="Envía un mensaje al agente..."
+                        class="w-full bg-transparent px-4 py-3 text-gray-200 resize-none outline-none placeholder-gray-500"
+                        onkeydown="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendPrompt(); }"></textarea>
+                    <div class="flex justify-end p-2 border-t border-gray-700/50 bg-gray-800/50 rounded-b-2xl">
+                        <button onclick="sendPrompt()" class="px-4 py-2 bg-gray-200 text-gray-900 font-bold text-sm rounded-lg hover:bg-white transition-colors flex items-center gap-2">
+                            <span>Enviar</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center text-xs text-gray-600 mt-3 font-medium">NexaOps Agent Portal puede cometer errores. Considera verificar el código generado.</div>
+            </div>
+        </main>
+        
+        <!-- Right: Agent Config / Preview -->
+        <aside id="right-panel" class="w-80 bg-gray-900 border-l border-gray-800 flex flex-col transition-all duration-300">
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-800 shrink-0">
+                <button onclick="switchTab('config')" id="tab-config" class="flex-1 py-3 text-sm font-medium border-b-2 border-indigo-500 text-indigo-400 transition-colors">Configuración</button>
+                <button onclick="switchTab('preview')" id="tab-preview" class="flex-1 py-3 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-200 transition-colors">Vista Previa</button>
+            </div>
+            
+            <!-- Config Tab Content -->
+            <div id="panel-config" class="p-4 overflow-y-auto flex-1">
+                <div id="agent-config" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Nombre</label>
+                        <input type="text" id="config-name" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm" disabled>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">OpenRouter API Key</label>
+                        <input type="password" id="config-api-key" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-blue-400" placeholder="sk-or-v1-..." onchange="saveApiKey(this.value)">
+                        <p class="text-xs text-gray-500 mt-1">Tu llave se guarda en tu navegador.</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Descripción</label>
+                        <textarea id="config-desc" rows="2" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Mode</label>
+                        <select id="config-mode" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm">
+                            <option value="primary">Primary</option>
+                            <option value="subagent">Subagent</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Tools</label>
+                        <div id="config-tools" class="space-y-2 text-sm"></div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Prompts Guardados</label>
+                        <div id="saved-prompts" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Tab Content -->
+            <div id="panel-preview" class="hidden flex-1 flex flex-col bg-white">
+                <div id="preview-placeholder" class="flex-1 flex items-center justify-center text-gray-500 bg-gray-900">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">👁️</div>
+                        <p class="text-sm">El artefacto generado aparecerá aquí</p>
+                    </div>
+                </div>
+                <iframe id="preview-frame" class="hidden w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- New Agent Modal -->
+    <div id="new-agent-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-md border border-gray-700">
+            <h3 class="text-xl font-bold mb-6">Crear Nuevo Agente</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Nombre</label>
+                    <input type="text" id="new-agent-name" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                </div>
+<div>
+                    <label class="block text-sm text-gray-400 mb-2">API del Sistema</label>
+                    <input type="text" id="api-url" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="http://localhost:4000/api">
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm text-gray-400 mb-2">OpenRouter API Key</label>
+                    <input type="password" id="openrouter-key" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="sk-or-v1-..." onchange="saveApiKey(this.value)">
+                </div>
+                
+                <div class="mt-4 p-4 rounded-lg bg-blue-500/20 border border-blue-500/50">
+                    <p class="text-sm text-blue-300">💡 Usa tu API key de OpenRouter para ejecutar prompts automáticamente.</p>
+                    <a href="https://openrouter.ai/keys" target="_blank" class="text-sm text-blue-400 underline">Obtener key gratis →</a>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Descripción</label>
+                    <input type="text" id="new-agent-desc" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700" placeholder="Descripción breve del agente">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Base</label>
+                    <select id="new-agent-base" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700">
+                        <option value="orchestrator">Orchestrator (base)</option>
+                        <option value="python">Python Developer</option>
+                        <option value="frontend">Frontend Developer</option>
+                        <option value="automation">Automation Developer</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeNewAgentModal()" class="flex-1 py-3 rounded-xl bg-gray-700">Cancelar</button>
+                <button onclick="createNewAgent()" class="flex-1 py-3 rounded-xl bg-indigo-600">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api-virid-six-51.vercel.app/api';
+        let agents = [];
+        let selectedAgent = null;
+        let chatHistory = {};
+        let currentArtifactHTML = null;
+        let artifactsList = [];
+        
+        const ALL_AGENTS = [
+            { name: 'Orchestrator', file: 'orchestrator-agent.md', desc: 'Coordinador principal', category: 'core' },
+            { name: 'Python Developer', file: 'python-developer.md', desc: 'Backend, APIs, data science', category: 'development' },
+            { name: 'Frontend Dev', file: 'frontend-dev.md', desc: 'React, Vue, interfaces', category: 'development' },
+            { name: 'Backend Dev', file: 'backend-dev.md', desc: 'APIs, microservices', category: 'development' },
+            { name: 'Mobile Dev', file: 'mobile-developer.md', desc: 'iOS, Android, React Native', category: 'development' },
+            { name: 'Desktop Dev', file: 'desktop-developer.md', desc: 'Electron, Tauri, PyQt', category: 'development' },
+            { name: 'Debug Agent', file: 'debug-agent.md', desc: 'Bug fixing, performance', category: 'operations' },
+            { name: 'Docs Writer', file: 'docs-writer.md', desc: 'Documentation', category: 'design' },
+            { name: 'UI/UX Designer', file: 'ui-ux-designer.md', desc: 'User experience', category: 'design' },
+            { name: 'Image Generator', file: 'image-generator.md', desc: 'Logos, banners, assets', category: 'design' },
+            { name: 'Automation Dev', file: 'automation-developer.md', desc: 'Scripts, bots, scraping', category: 'automation' },
+            { name: 'n8n Automation', file: 'n8n-automation.md', desc: 'Workflows para n8n', category: 'automation' },
+            { name: 'SaaS Architect', file: 'saas-architect.md', desc: 'Cloud architecture', category: 'infrastructure' },
+            { name: 'DevOps Engineer', file: 'devops-engineer.md', desc: 'CI/CD, Docker, K8s', category: 'infrastructure' },
+            { name: 'Deploy Agent', file: 'deploy-agent.md', desc: 'Deploy websites', category: 'infrastructure' },
+            { name: 'Digital Marketing', file: 'digital-marketing.md', desc: 'SEO, content, ads', category: 'business' },
+            { name: 'Project Manager', file: 'project-manager.md', desc: 'Planning, Agile', category: 'business' },
+            { name: 'NexaOps Team', file: 'nexaops-team.md', desc: 'Líder de equipo', category: 'core' },
+        ];
+        
+        const TOOLS = ['bash', 'read', 'edit', 'glob', 'grep', 'webfetch', 'websearch', 'codesearch', 'task', 'todowrite', 'question'];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAgents();
+            loadSavedAgents();
+            
+            // Cargar API Key si existe
+            const savedKey = localStorage.getItem('openrouter_api_key');
+            if (savedKey) {
+                document.getElementById('openrouter-key').value = savedKey;
+                document.getElementById('config-api-key').value = savedKey;
+            }
+        });
+        
+        function loadAgents() {
+            agents = ALL_AGENTS;
+            displayAgents(agents);
+        }
+        
+        function displayAgents(list) {
+            document.getElementById('agents-list').innerHTML = list.map(a => `
+                <button onclick="selectAgent('${a.name}')" 
+                    class="agent-card w-full text-left px-4 py-3 rounded-xl bg-gray-800/50 hover:bg-gray-800 transition-all ${selectedAgent?.name === a.name ? 'border border-indigo-500' : 'border border-gray-700'}">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${getAgentEmoji(a.category)}</span>
+                        <div>
+                            <div class="font-medium">${a.name}</div>
+                            <div class="text-xs text-gray-400">${a.desc}</div>
+                        </div>
+                    </div>
+                </button>
+            `).join('');
+        }
+        
+        function getAgentEmoji(category) {
+            return {
+                core: '🎯',
+                development: '💻',
+                operations: '🔧',
+                design: '🎨',
+                automation: '⚡',
+                infrastructure: '🏗️',
+                business: '📈'
+            }[category] || '🤖';
+        }
+        
+        function filterAgents(query) {
+            const filtered = agents.filter(a => 
+                a.name.toLowerCase().includes(query.toLowerCase()) ||
+                a.desc.toLowerCase().includes(query.toLowerCase())
+            );
+            displayAgents(filtered);
+        }
+        
+        function selectAgent(name) {
+            selectedAgent = agents.find(a => a.name === name);
+            document.getElementById('selected-agent-name').textContent = selectedAgent.name;
+            document.getElementById('selected-agent-desc').textContent = selectedAgent.desc;
+            document.getElementById('btn-run').disabled = false;
+            
+            // Load config
+            document.getElementById('config-name').value = selectedAgent.name;
+            document.getElementById('config-desc').value = selectedAgent.desc;
+            
+            // Reset chat and try to load history
+            document.getElementById('chat-messages').innerHTML = '';
+            
+            const savedChat = localStorage.getItem(`nexaops_chat_${selectedAgent.name}`);
+            if (savedChat) {
+                chatHistory[selectedAgent.name] = JSON.parse(savedChat);
+                chatHistory[selectedAgent.name].forEach(msg => {
+                    addMessage(msg.role, msg.content, false);
+                });
+            } else {
+                chatHistory[selectedAgent.name] = [];
+                // Show default welcome
+                document.getElementById('chat-messages').innerHTML = `
+                    <div id="chat-placeholder" class="text-center text-gray-500 py-16 flex flex-col items-center justify-center h-full">
+                        <div class="w-20 h-20 bg-gray-900 border border-gray-800 rounded-2xl flex items-center justify-center text-5xl mb-6 shadow-xl">
+                            ${getAgentEmoji(selectedAgent.category)}
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-200 mb-2">Hola, soy ${selectedAgent.name}</h3>
+                        <p class="max-w-md">${selectedAgent.desc}</p>
+                    </div>
+                `;
+            }
+            
+            loadSavedPrompts(name);
+            displayTools();
+            
+            // Update sidebar selection
+            document.querySelectorAll('.agent-card').forEach(card => {
+                card.classList.remove('border-indigo-500');
+                card.classList.add('border-gray-700');
+            });
+        }
+        
+        function displayTools() {
+            document.getElementById('config-tools').innerHTML = TOOLS.map(tool => `
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" value="${tool}" checked class="rounded">
+                    <span>${tool}</span>
+                </label>
+            `).join('');
+        }
+        
+        async function loadSavedAgents() {
+            try {
+                const res = await fetch(`${API_URL}/agents`);
+                if (res.ok) {
+                    const savedAgents = await res.json();
+                    // Merge saved config with default agents
+                    savedAgents.forEach(savedAgent => {
+                        const index = agents.findIndex(a => a.name === savedAgent.name);
+                        if (index !== -1) {
+                            agents[index] = { ...agents[index], ...savedAgent };
+                        } else {
+                            agents.push({ ...savedAgent, category: savedAgent.category || 'custom' });
+                        }
+                    });
+                    displayAgents(agents);
+                }
+            } catch (e) {
+                console.log('Using default agents');
+            }
+        }
+        
+        async function loadSavedPrompts(agentName) {
+            try {
+                const res = await fetch(`${API_URL}/agents/${encodeURIComponent(agentName)}/prompts`);
+                if (res.ok) {
+                    const prompts = await res.json();
+                    document.getElementById('saved-prompts').innerHTML = prompts.map(p => `
+                        <div class="p-2 rounded-lg bg-gray-800 text-sm cursor-pointer hover:bg-gray-700"
+                            onclick="loadPrompt('${p.prompt}')">
+                            <div class="truncate">${p.prompt}</div>
+                            <div class="text-xs text-gray-500">${new Date(p.createdAt).toLocaleDateString()}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                document.getElementById('saved-prompts').innerHTML = '<p class="text-gray-500 text-sm">Sin prompts guardados</p>';
+            }
+        }
+        
+        function loadPrompt(prompt) {
+            document.getElementById('prompt-input').value = prompt;
+        }
+        
+        function sendPrompt() {
+            runAgent();
+        }
+        
+        function saveApiKey(val) {
+            const key = val.trim();
+            if (key) {
+                localStorage.setItem('openrouter_api_key', key);
+                document.getElementById('openrouter-key').value = key;
+                document.getElementById('config-api-key').value = key;
+                alert('API Key de OpenRouter guardada correctamente.');
+            }
+        }
+        
+        function addMessage(role, content, save = true) {
+            const messagesDiv = document.getElementById('chat-messages');
+            
+            const placeholder = document.getElementById('chat-placeholder');
+            if (placeholder) placeholder.remove();
+
+            const isUser = role === 'user';
+            const avatar = isUser 
+                ? '<div class="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-lg">Tú</div>'
+                : `<div class="w-8 h-8 rounded-xl bg-gray-800 border border-gray-700 text-white flex items-center justify-center text-lg shrink-0 shadow-lg">${getAgentEmoji(selectedAgent ? selectedAgent.category : 'core')}</div>`;
+
+            const div = document.createElement('div');
+            div.className = `flex gap-4 p-6 ${isUser ? '' : 'bg-gray-900/30 border-y border-gray-800/50'} w-full`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'flex-1 min-w-0 prose prose-invert max-w-none chat-message';
+            
+            let originalContent = content; // Guardar versión pura para historial
+            
+            if (role === 'agent') {
+                const extractedCode = extractCode(content);
+                if (extractedCode) {
+                    const idx = artifactsList.length;
+                    artifactsList.push(extractedCode);
+                    currentArtifactHTML = extractedCode; 
+                    
+                    const extraHTML = `\n\n<div class="flex gap-3 mt-6 not-prose">
+                        <button onclick="renderArtifactFromList(${idx})" class="px-5 py-2.5 bg-gray-200 hover:bg-white text-gray-900 rounded-xl text-xs font-bold transition-colors shadow-lg flex items-center gap-2">👁️ Vista Previa</button>
+                        <button onclick="downloadCurrentArtifact()" class="px-5 py-2.5 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg flex items-center gap-2">⬇️ Descargar</button>
+                    </div>`;
+                    content += extraHTML; // Solo se agrega visualmente, no al history
+                    
+                    if (save) setTimeout(() => renderArtifactFromList(idx), 100);
+                }
+                
+                try {
+                    contentDiv.innerHTML = marked.parse(content);
+                    contentDiv.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                } catch (e) {
+                    contentDiv.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+                }
+            } else {
+                contentDiv.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+            }
+            
+            div.innerHTML = `
+                <div class="max-w-4xl mx-auto flex gap-6 w-full">
+                    ${avatar}
+                    <div class="flex-1 min-w-0 msg-content"></div>
+                </div>
+            `;
+            div.querySelector('.msg-content').appendChild(contentDiv);
+            
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            if (save && selectedAgent) {
+                if (!chatHistory[selectedAgent.name]) chatHistory[selectedAgent.name] = [];
+                chatHistory[selectedAgent.name].push({ role, content: originalContent });
+                localStorage.setItem(`nexaops_chat_${selectedAgent.name}`, JSON.stringify(chatHistory[selectedAgent.name]));
+            }
+        }
+        
+        function extractCode(content) {
+            // Intenta encontrar bloque html específico
+            const htmlMatch = content.match(/```(?:html|HTML)\n([\s\S]*?)```/);
+            if (htmlMatch) return htmlMatch[1];
+            
+            // Intenta encontrar cualquier bloque de código
+            const anyMatch = content.match(/```\w*\n([\s\S]*?)```/);
+            if (anyMatch && (anyMatch[1].includes('<div') || anyMatch[1].includes('<html'))) {
+                return anyMatch[1];
+            }
+            
+            // Si hay un SVG directo
+            const svgMatch = content.match(/<svg[\s\S]*?<\/svg>/);
+            if (svgMatch) return svgMatch[0];
+            
+            // Si la respuesta completa es HTML directo
+            if (content.trim().startsWith('<!DOCTYPE') || content.trim().startsWith('<html')) return content;
+            
+            return null;
+        }
+
+        function renderArtifact(code) {
+            const frame = document.getElementById('preview-frame');
+            const placeholder = document.getElementById('preview-placeholder');
+            
+            placeholder.classList.add('hidden');
+            frame.classList.remove('hidden');
+            
+            // Inyectar Tailwind automáticamente si no está presente para que los estilos funcionen
+            let finalCode = code;
+            if (!code.includes('tailwindcss') && !code.includes('<style>')) {
+                finalCode = `<html><head><script src="https://cdn.tailwindcss.com"><\\/script></head><body class="p-4 bg-gray-50 flex items-center justify-center min-h-screen">${code}</body></html>`;
+            }
+            
+            frame.srcdoc = finalCode;
+            
+            switchTab('preview');
+            // Expandir panel
+            document.getElementById('right-panel').classList.remove('w-80');
+            document.getElementById('right-panel').classList.add('w-1/2');
+        }
+
+        function renderCurrentArtifact() {
+            if(currentArtifactHTML) renderArtifact(currentArtifactHTML);
+        }
+
+        function renderArtifactFromList(idx) {
+            if(artifactsList[idx]) {
+                currentArtifactHTML = artifactsList[idx];
+                renderArtifact(currentArtifactHTML);
+            }
+        }
+
+        function downloadCurrentArtifact() {
+            if(!currentArtifactHTML) return;
+            const blob = new Blob([currentArtifactHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `artifact-${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function switchTab(tab) {
+            if (tab === 'config') {
+                document.getElementById('tab-config').classList.replace('border-transparent', 'border-indigo-500');
+                document.getElementById('tab-config').classList.replace('text-gray-400', 'text-indigo-400');
+                document.getElementById('tab-preview').classList.replace('border-indigo-500', 'border-transparent');
+                document.getElementById('tab-preview').classList.replace('text-indigo-400', 'text-gray-400');
+                
+                document.getElementById('panel-config').classList.remove('hidden');
+                document.getElementById('panel-preview').classList.add('hidden');
+                
+                // Reduce panel back
+                document.getElementById('right-panel').classList.remove('w-1/2');
+                document.getElementById('right-panel').classList.add('w-80');
+            } else {
+                document.getElementById('tab-preview').classList.replace('border-transparent', 'border-indigo-500');
+                document.getElementById('tab-preview').classList.replace('text-gray-400', 'text-indigo-400');
+                document.getElementById('tab-config').classList.replace('border-indigo-500', 'border-transparent');
+                document.getElementById('tab-config').classList.replace('text-indigo-400', 'text-gray-400');
+                
+                document.getElementById('panel-preview').classList.remove('hidden');
+                document.getElementById('panel-config').classList.add('hidden');
+                
+                // Keep expanded if already expanded, or expand if showing artifact
+                document.getElementById('right-panel').classList.remove('w-80');
+                document.getElementById('right-panel').classList.add('w-1/2');
+            }
+        }
+
+        async function runAgent() {
+            const prompt = document.getElementById('prompt-input').value.trim();
+            if (!selectedAgent) return alert('Por favor, selecciona un agente en el menú de la izquierda.');
+            if (!prompt) return alert('Por favor, escribe un prompt.');
+            
+            // Limpiar input y agregar mensaje del usuario
+            document.getElementById('prompt-input').value = '';
+            addMessage('user', prompt, true);
+            
+            const loadingId = Date.now();
+            addMessage('agent', `<div id="loading-${loadingId}" class="typing">⏳ Generando código con IA...</div>`, false);
+            
+            let response = null;
+            let retries = 3;
+            
+            for (let i = 0; i < retries; i++) {
+                try {
+                    response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('openrouter_api_key')}`
+                        },
+                        body: JSON.stringify({
+                            model: 'anthropic/claude-3.5-haiku',
+                            messages: [{
+                                role: 'user',
+                                content: `Eres ${selectedAgent.name}. ${selectedAgent.desc}\n\nGenera código según este prompt: ${prompt}\n\nResponde SOLO con código listo para usar, sin explicaciones largas. Usa TailwindCSS si haces HTML.`
+                            }]
+                        })
+                    });
+                    
+                    if (response.ok) break; // Si fue exitoso, salir del bucle de reintento
+                    
+                    // Remover mensaje de carga previo al error
+                    const loadingEl = document.getElementById(`loading-${loadingId}`);
+                    if (loadingEl) loadingEl.closest('.flex.gap-4.p-6').remove();
+                    
+                    if (response.status === 429 || response.status >= 500) {
+                        if (i < retries - 1) {
+                            addMessage('agent', `⏳ Servidor saturado. Reintentando de nuevo automáticamente (${i + 1}/${retries})...`);
+                            await new Promise(r => setTimeout(r, 3000 * (i + 1))); // Esperar antes de reintentar
+                        } else {
+                            addMessage('agent', '❌ Servidores de la API están demasiado ocupados. Intenta de nuevo más tarde.', true);
+                            return;
+                        }
+                    } else {
+                        try {
+                            const errData = await response.json();
+                            addMessage('agent', `❌ Error de API de OpenRouter (Código ${response.status}): ${errData.error?.message || 'Error desconocido. Verifica tu API key en Configuración.'}`, true);
+                        } catch(e) {
+                            addMessage('agent', `❌ Error de API (Código ${response.status}). Verifica tu API key en Configuración.`, true);
+                        }
+                        return;
+                    }
+                } catch (e) {
+                    if (i === retries - 1) {
+                        const loadingEl = document.getElementById(`loading-${loadingId}`);
+                        if (loadingEl) loadingEl.closest('.flex.gap-4.p-6').remove();
+                        addMessage('agent', `❌ Error de red.\n\nUsa Kilo CLI:\n\n\`\`\`bash\nkilo --agent ${selectedAgent.file.replace('.md', '')} "${prompt}"\n\`\`\``, true);
+                        return;
+                    }
+                }
+            }
+            
+            try {
+                const loadingEl = document.getElementById(`loading-${loadingId}`);
+                if (loadingEl) loadingEl.closest('.flex.gap-4.p-6').remove();
+                
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    const content = data.choices[0].message.content;
+                    addMessage('agent', content, true);
+                } else {
+                    addMessage('agent', '❌ Error. Configura tu API key de OpenRouter en Configuración.', true);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        async function saveAgentConfig() {
+            if (!selectedAgent) return;
+            
+            const config = {
+                name: selectedAgent.name,
+                file: selectedAgent.file,
+                description: document.getElementById('config-desc').value,
+                mode: document.getElementById('config-mode').value,
+                tools: Array.from(document.querySelectorAll('#config-tools input:checked')).map(i => i.value)
+            };
+            
+            try {
+                await fetch(`${API_URL}/agents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                alert('Configuración guardada');
+            } catch (e) {
+                // Save to localStorage as fallback
+                localStorage.setItem(`agent_${selectedAgent.name}`, JSON.stringify(config));
+                alert('Guardado localmente');
+            }
+        }
+        
+        function showNewAgentModal() {
+            document.getElementById('new-agent-modal').classList.remove('hidden');
+        }
+        
+        function closeNewAgentModal() {
+            document.getElementById('new-agent-modal').classList.add('hidden');
+        }
+        
+        async function createNewAgent() {
+            const name = document.getElementById('new-agent-name').value;
+            const desc = document.getElementById('new-agent-desc').value;
+            const base = document.getElementById('new-agent-base').value;
+            
+            if (!name) return alert('Nombre requerido');
+            
+            const newAgent = {
+                name,
+                file: `${name.toLowerCase().replace(/\s+/g, '-')}.md`,
+                desc: desc || 'Nuevo agente',
+                category: 'custom'
+            };
+            
+            try {
+                // Acción para persistir el agente en el backend
+                const response = await fetch(`${API_URL}/agents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newAgent)
+                });
+                
+                if (response.ok) {
+                    const savedAgent = await response.json();
+                    agents.push(savedAgent);
+                    displayAgents(agents);
+                    closeNewAgentModal();
+                    selectAgent(savedAgent.name);
+                } else {
+                    alert('Error al crear el agente en el servidor.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('No se pudo conectar con la API. El agente se creó solo de forma local.');
+                agents.push(newAgent);
+                displayAgents(agents);
+                closeNewAgentModal();
+                selectAgent(name);
+            }
+        }
+    </script>
+</body>
+</html>
