@@ -1,14 +1,17 @@
 {
   "name": "nexaops-api",
-  "version": "1.0.0",
-  "description": "NexaOps AI Backend API",
+  "version": "1.1.0",
+  "description": "NexaOps AI Backend API - WhatsApp via Green API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "node test-green-api.js",
+    "setup": "node setup-green-api.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.0",
+    "axios": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.18.2",

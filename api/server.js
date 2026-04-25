@@ -5,10 +5,90 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { createClient } = require('@supabase/supabase-js');
 const { z } = require('zod');
+const axios = require('axios');
 
 const app = express();
 
-// ==================== SEGURIDAD AVANZADA ====================
+// ==================== GREEN API CONFIG ====================
+const GREEN_API_INSTANCE = process.env.GREEN_API_INSTANCE || '';
+const GREEN_API_TOKEN = process.env.GREEN_API_TOKEN || '';
+const GREEN_API_BASE = `https://api.green-api.com/waInstance${GREEN_API_INSTANCE}`;
+
+// ==================== GREEN API WEBHOOK (PRIMERO, SIN MIDDLEWARE) ====================
+// Green API envía JSON con formato {"body": {"typeMessage":"textMessage","textMessageData":{"textMessage":"hola"},"senderData":{"chatId":"34605797755@c.us"}}}
+app.post('/api/webhook/whatsapp', express.json({ type: '*/*' }), async (req, res) => {
+    // Timeout de seguridad: si Supabase tarda mucho, respondemos igual pero registramos
+    const timer = setTimeout(() => {
+        console.log('Timeout de procesamiento Green API');
+    }, 8500);
+
+    try {
+        const body = req.body;
+        
+        // Extraer datos del formato Green API
+        const messageData = body.body || {};
+        const textMessage = messageData.textMessageData?.textMessage || '';
+        const chatId = messageData.senderData?.chatId || '';
+        const incomingMsg = (textMessage || '').toLowerCase().trim();
+
+        console.log('Green API webhook received:', { chatId, incomingMsg });
+
+        if (!chatId) {
+            clearTimeout(timer);
+            return res.status(400).json({ error: 'No chatId provided' });
+        }
+
+        const reply = await buildWAReply(incomingMsg, chatId);
+
+        // Enviar respuesta por Green API (no necesitamos responder HTTP inmediatamente)
+        await sendWhatsAppGreenAPI(chatId, reply);
+
+        clearTimeout(timer);
+        // Green API espera 200 OK
+        res.status(200).json({ received: true });
+    } catch (err) {
+        console.error('Green API webhook error:', err);
+        clearTimeout(timer);
+        // Intentamos enviar error por WhatsApp
+        try {
+            await sendWhatsAppGreenAPI(
+                req.body?.body?.senderData?.chatId || '',
+                'Error temporal. Por favor intenta de nuevo.'
+            );
+        } catch (e) {
+            console.error('Error sending error reply:', e);
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==================== GREEN API: ENVIAR WHATSAPP ====================
+async function sendWhatsAppGreenAPI(chatId, message) {
+    if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
+        console.error('Green API no configurado');
+        return;
+    }
+
+    try {
+        const url = `${GREEN_API_BASE}/sendMessage/${GREEN_API_TOKEN}`;
+        const payload = {
+            chatId: chatId,
+            message: message
+        };
+
+        const response = await axios.post(url, payload, {
+            timeout: 5000
+        });
+
+        console.log('Green API send response:', response.data);
+        return response.data;
+    } catch (err) {
+        console.error('Green API send error:', err.response?.data || err.message);
+        throw err;
+    }
+}
+
+
 
 // 1. Helmet: Protege cabeceras HTTP (Anti-XSS, Anti-Clickjacking)
 app.use(helmet());
@@ -21,7 +101,8 @@ const allowedOrigins = [
   'https://nexaops-ai.vercel.app',
   'https://nexaops-ai-admin.vercel.app',
   'https://admin-nexaops-ai.vercel.app',
-  'https://admin.nexaops.com'
+  'https://admin.nexaops.com',
+  'null'
 ];
 app.use(cors({
   origin: function (origin, callback) {
@@ -91,6 +172,197 @@ const projectSchema = z.object({
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString(), database: 'supabase' });
+});
+
+// ==================== WHATSAPP BOT (GREEN API) ====================
+
+const PORTAL_BASE = 'https://nexaops-ai.vercel.app/clients/?id=';
+
+// Helper: find client by phone (in-memory filter - avoids slow ilike)
+// Green API usa formato chatId: "34605797755@c.us" (número@s.whatsapp.net)
+// Extraemos el número del chatId
+async function findClientByChatId(chatId) {
+    // Extraer número del chatId de Green API (formato: "34605797755@c.us")
+    let phoneNumber = chatId.replace('@c.us', '').replace('@g.us', '');
+    if (!phoneNumber) return null;
+    
+    const digits = phoneNumber.replace(/\D/g, '');
+    const last9 = digits.slice(-9);
+    
+    const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, status, phone')
+        .not('phone', 'is', null);
+    if (error || !data) return null;
+    return data.find(c => (c.phone || '').replace(/\D/g, '').endsWith(last9)) || null;
+}
+
+// Helper: get client projects
+async function getClientProjects(clientId) {
+    const { data } = await supabase
+        .from('projects')
+        .select('name, status, progress')
+        .eq('clientId', clientId);
+    return data || [];
+}
+
+// Helper: send WhatsApp message via Green API
+// Green API espera enviar a chatId (número@s.whatsapp.net)
+async function sendWhatsApp(chatId, message) {
+    if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
+        console.error('Green API credentials missing');
+        return;
+    }
+    
+    // Asegurarnos que chatId tiene el formato correcto
+    let targetChatId = chatId;
+    if (!chatId.includes('@')) {
+        targetChatId = `${chatId.replace(/\D/g, '')}@c.us`;
+    }
+    
+    try {
+        await sendWhatsAppGreenAPI(targetChatId, message);
+    } catch (err) {
+        console.error('Failed to send WhatsApp message:', err);
+    }
+}
+
+// Helper: build reply message async
+async function buildWAReply(incomingMsg, chatId) {
+    const client = await findClientByChatId(chatId);
+    if (!client) {
+        return 'Hola! Soy el asistente de NexaOps AI.\n\n'
+             + 'No encontramos tu numero en el sistema.\n\n'
+             + 'Visita: https://nexaops-ai.vercel.app\n'
+             + 'O escribe CONTACTAR para hablar con un agente.';
+    }
+    const projects = await getClientProjects(client.id);
+    const portalLink = PORTAL_BASE + client.id;
+    if (['hola','hi','help','menu','1','estado','proyecto','progreso'].some(kw => incomingMsg.includes(kw))) {
+        const info = projects.length > 0
+            ? projects.map(p => '- ' + p.name + ': ' + (p.progress||0) + '% (' + p.status + ')').join('\n')
+            : 'Tu proyecto esta siendo preparado.';
+        return 'NexaOps AI - Hola ' + client.name + '!\n\nTus proyectos:\n' + info
+             + '\n\nTu portal: ' + portalLink + '\n\nResponde: 1=Estado, 2=Soporte';
+    }
+    if (['soporte','ayuda','contactar','2'].some(kw => incomingMsg.includes(kw))) {
+        return 'Soporte NexaOps AI\n\nUn agente te atendera pronto.\nHorario: Lun-Vie 9am-6pm\n\nTu portal: ' + portalLink;
+    }
+    return 'NexaOps AI - Hola ' + client.name + '!\n\nResponde: 1=Estado, 2=Soporte';
+}
+
+// Helper: build reply message async
+async function buildWAReply(incomingMsg, fromNumber) {
+    const client = await findClientByPhone(fromNumber);
+    if (!client) {
+        return 'Hola! Soy el asistente de NexaOps AI.\n\n'
+             + 'No encontramos tu numero en el sistema.\n\n'
+             + 'Visita: https://nexaops-ai.vercel.app\n'
+             + 'O escribe CONTACTAR para hablar con un agente.';
+    }
+    const projects = await getClientProjects(client.id);
+    const portalLink = PORTAL_BASE + client.id;
+    if (['hola','hi','help','menu','1','estado','proyecto','progreso'].some(kw => incomingMsg.includes(kw))) {
+        const info = projects.length > 0
+            ? projects.map(p => '- ' + p.name + ': ' + (p.progress||0) + '% (' + p.status + ')').join('\n')
+            : 'Tu proyecto esta siendo preparado.';
+        return 'NexaOps AI - Hola ' + client.name + '!\n\nTus proyectos:\n' + info
+             + '\n\nTu portal: ' + portalLink + '\n\nResponde: 1=Estado, 2=Soporte';
+    }
+    if (['soporte','ayuda','contactar','2'].some(kw => incomingMsg.includes(kw))) {
+        return 'Soporte NexaOps AI\n\nUn agente te atendera pronto.\nHorario: Lun-Vie 9am-6pm\n\nTu portal: ' + portalLink;
+    }
+    return 'NexaOps AI - Hola ' + client.name + '!\n\nResponde: 1=Estado, 2=Soporte';
+}
+
+
+// SEND NOTIFICATION — admin triggers this to notify a client proactively
+app.post('/api/notify/whatsapp', async (req, res) => {
+    try {
+        if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
+            return res.status(503).json({ error: 'Green API no configurado' });
+        }
+        const { clientId, message } = req.body;
+        if (!clientId || !message) return res.status(400).json({ error: 'clientId y message son requeridos' });
+
+        const { data: client } = await supabase
+            .from('clients')
+            .select('name, phone')
+            .eq('id', clientId)
+            .single();
+
+        if (!client || !client.phone) return res.status(404).json({ error: 'Cliente sin número de WhatsApp' });
+
+        // Convert phone number to Green API chatId format
+        const cleanPhone = client.phone.replace(/[^0-9+]/g, '');
+        const chatId = `${cleanPhone}@c.us`;
+        
+        await sendWhatsApp(chatId, message);
+        res.json({ success: true, sent_to: chatId });
+    } catch (err) {
+        console.error('Notify error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// HEALTH CHECK - verify Green API connection
+app.get('/api/whatsapp/health', async (req, res) => {
+    if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
+        return res.status(500).json({ error: 'Green API credentials not configured' });
+    }
+    try {
+        const url = `${GREEN_API_BASE}/getStateInstance/${GREEN_API_TOKEN}`;
+        const response = await axios.get(url, { timeout: 5000 });
+        res.json({ 
+            status: 'ok', 
+            greenApi: response.data,
+            instance: GREEN_API_INSTANCE,
+            configured: true
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            status: 'error', 
+            error: err.message,
+            instance: GREEN_API_INSTANCE,
+            configured: !!GREEN_API_INSTANCE
+        });
+    }
+});
+
+// GET QR CODE for WhatsApp connection
+app.get('/api/whatsapp/qr', async (req, res) => {
+    if (!GREEN_API_INSTANCE || !GREEN_API_TOKEN) {
+        return res.status(500).json({ error: 'Green API credentials not configured' });
+    }
+    try {
+        const url = `${GREEN_API_BASE}/getQRCode/${GREEN_API_TOKEN}`;
+        const response = await axios.get(url, { timeout: 5000 });
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PUBLIC CLIENT VIEW — no API key needed, only client ID as token
+app.get('/api/client-view/:id', async (req, res) => {
+    try {
+        const { data: client, error: clientError } = await supabase
+            .from('clients')
+            .select('id, name, email, phone, status, createdAt')
+            .eq('id', req.params.id)
+            .single();
+
+        if (clientError || !client) return res.status(404).json({ error: 'Cliente no encontrado' });
+
+        const { data: projects } = await supabase
+            .from('projects')
+            .select('id, name, description, status, progress, createdAt')
+            .eq('clientId', req.params.id);
+
+        res.json({ client, projects: projects || [] });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.get('/api/stats', async (req, res) => {
@@ -305,5 +577,12 @@ app.post('/api/agents/:name/prompts', async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 module.exports = app;
