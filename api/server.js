@@ -19,8 +19,8 @@ const GREEN_API_INSTANCE = process.env.GREEN_API_INSTANCE || '';
 const GREEN_API_TOKEN = process.env.GREEN_API_TOKEN || '';
 const GREEN_API_BASE = `https://api.green-api.com/waInstance${GREEN_API_INSTANCE}`;
 
-// ==================== GREEN API WEBHOOK (PRIMERO, SIN MIDDLEWARE) ====================
-// Green API envía JSON con formato {"body": {"textMessageData":{"textMessage":"hola"},"senderData":{"chatId":"584121146391@c.us"}}}
+// ==================== GREEN API WEBHOOK ====================
+// Último rebuild: 2026-04-25
 app.post('/api/webhook/whatsapp', express.json({ type: '*/*' }), async (req, res) => {
     // Timeout de seguridad: si Supabase tarda mucho, respondemos igual pero registramos
     const timer = setTimeout(() => {
