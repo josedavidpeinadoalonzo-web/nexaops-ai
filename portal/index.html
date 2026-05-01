@@ -63,7 +63,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://api-virid-six-51.vercel.app/api';
+        const API_URL = localStorage.getItem('nexaops_api_url') || 'https://nexaops-ai.vercel.app/api';
         let allProjects = [];
         let currentFilter = 'all';
         
@@ -79,7 +79,7 @@
                 document.getElementById('projects-grid').innerHTML = `
                     <div class="col-span-2 p-8 rounded-2xl bg-gray-800/50 border border-gray-700 text-center">
                         <p class="text-gray-400">Conectando a la API...</p>
-                        <p class="text-sm text-gray-500 mt-2"> Asegúrate de que la API esté corriendo en http://localhost:3000</p>
+                        <p class="text-sm text-gray-500 mt-2"> Asegúrate de que la API esté corriendo en http://localhost:3001</p>
                     </div>
                 `;
             }

@@ -1,0 +1,45 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    COTIZACIÓN
+                   NEXAOPS AI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📅 Fecha: {{fecha}}
+
+👤 Cliente: {{cliente_nombre}}
+🏢 Empresa: {{cliente_empresa}}
+📧 Email: {{cliente_email}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              SERVICIO SOLICITADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{{servicio}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                 INVERSIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 Precio: {{precio}}
+📆 Validez: {{validez}}
+
+📋 Condiciones:
+{{condiciones}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NexaOps AI - Automatización Inteligente
+WhatsApp: +58 412-1146391
+Email: contacto@nexaops.ai
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+INSTRUCCIONES PARA CARGAR EN GOOGLE DOCS:
+
+1. Ve a https://drive.google.com
+2. Nuevo → Documento de Google Docs
+3. Abre el editor (haz doble clic en el archivo para editar)
+4. Copia TODO el contenido de arriba
+5. Pega en el documento
+6. Guarda el documento
+
+NOTA: Los campos {{campo}} serán reemplazados automáticamente por n8n
