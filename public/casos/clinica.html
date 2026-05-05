@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica IA | Automatización NexaOps AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexa: { neon: '#d4ff00', dark: '#0a0a0a', card: '#111111', gray: '#888888' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #000; color: #fff; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .btn-neon { background-color: #d4ff00; color: #000; transition: all 0.3s; }
+        .btn-neon:hover { box-shadow: 0 0 20px rgba(212, 255, 0, 0.4); transform: translateY(-2px); }
+        .bg-grain::after {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05; pointer-events: none;
+        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* WhatsApp Simulator */
+        .phone-mockup {
+            width: 300px; height: 600px; background: #111; border: 8px solid #222;
+            border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .chat-header { background: #075e54; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .chat-body { background: #e5ddd5; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: all 0.5s; }
+        .msg-in { background: #fff; color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-out { background: #dcf8c6; color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.show { opacity: 1; transform: translateY(0); }
+
+        /* Comparison Table */
+        .comp-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .comp-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="fixed inset-0 z-[-1] bg-grain opacity-50"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-blue-500/10 to-transparent z-[-1]"></div>
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <img src="/assets/nexaops_logo_1777663415915.png" alt="NexaOps Logo" class="h-8 w-8 rounded-lg object-cover">
+                <div class="font-bold text-xl tracking-tighter">NexaOps<span class="text-nexa-neon">.</span></div>
+            </a>
+            <a href="/#casos" class="text-sm font-medium text-gray-400 hover:text-white transition">← Volver a Casos</a>
+        </div>
+    </nav>
+
+    <!-- Hero Caso -->
+    <header class="pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-center md:text-left">
+            <div class="inline-block px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-6">Sector Salud</div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">Clínica <span class="text-nexa-neon">IA</span></h1>
+            <p class="text-lg text-nexa-gray max-w-2xl mb-8">Optimizamos la gestión de pacientes y agendamiento médico mediante inteligencia artificial conversacional.</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs border-blue-500/20">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Sistema Médico Activo
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs">
+                    🔒 Cumplimiento HIPAA
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mejora 1: Simulador de WhatsApp -->
+        <div class="flex-shrink-0 reveal">
+            <div class="phone-mockup">
+                <div class="chat-header">
+                    <div class="w-8 h-8 rounded-full bg-gray-600"></div>
+                    <div class="text-xs font-bold">Clínica IA Assistant</div>
+                </div>
+                <div class="chat-body" id="sim-chat">
+                    <!-- Mensajes se cargan por JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mejora 2: Comparativa -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">Eficiencia Médica</h2>
+            <p class="text-nexa-gray">Comparativa entre gestión tradicional y NexaOps AI.</p>
+        </div>
+        <div class="max-w-4xl mx-auto glass-card rounded-3xl overflow-hidden border border-white/10">
+            <div class="grid grid-cols-2 bg-white/5 p-6 font-bold text-center border-b border-white/10">
+                <div class="text-gray-400">Gestión Manual</div>
+                <div class="text-nexa-neon">NexaOps Health AI</div>
+            </div>
+            <div class="p-8 space-y-0 text-sm">
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Líneas telefónicas ocupadas y espera del paciente."</div>
+                    <div class="text-white font-medium">Agendamiento 24/7 sin colas de espera.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Olvidos de citas y huecos en la agenda."</div>
+                    <div class="text-white font-medium">Recordatorios automáticos y re-agendamiento instantáneo.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Carga administrativa alta para entregar resultados."</div>
+                    <div class="text-white font-medium">Envío automático de PDFs de laboratorio vía WhatsApp.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 3: Calculadora ROI -->
+    <section class="py-24 px-6 max-w-5xl mx-auto text-center reveal">
+        <h2 class="text-3xl font-bold mb-12">Calcula el Tiempo Liberado</h2>
+        <div class="glass-card p-10 rounded-3xl border border-nexa-neon/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-left space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Pacientes Mensuales</label>
+                        <input type="range" id="pacientes-input" min="50" max="2000" value="300" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>50</span><span id="pacientes-val" class="text-nexa-neon font-bold">300</span><span>2000</span></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Minutos por gestión administrativa</label>
+                        <input type="range" id="gestion-input" min="5" max="30" value="10" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>5 min</span><span id="gestion-val" class="text-nexa-neon font-bold">10 min</span><span>30 min</span></div>
+                    </div>
+                </div>
+                <div class="bg-nexa-neon/10 p-8 rounded-2xl border border-nexa-neon/20">
+                    <div class="text-xs uppercase font-bold text-nexa-gray mb-2">Horas de recepción ahorradas</div>
+                    <div class="text-5xl font-black text-nexa-neon mb-4" id="ahorro-horas">50h</div>
+                    <div class="text-xs text-gray-400 leading-relaxed">Tu personal podrá enfocarse en la atención al paciente mientras la IA gestiona la logística.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 4: Diagrama de Flujo -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <h2 class="text-3xl font-bold mb-16 text-center">Protocolo de Atención Digital</h2>
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">📲</div>
+                <div class="text-xs font-bold">Solicitud de Cita</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-blue-500/30 scale-110 bg-blue-500/5">
+                <div class="text-2xl mb-2">🏥</div>
+                <div class="text-xs font-bold">Triaje e IA</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">🩺</div>
+                <div class="text-xs font-bold">Cita Confirmada</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Procesos Detallados (Antiguo) -->
+    <section class="py-20 px-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-16 text-center">Tecnología en Salud</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-nexa-neon">
+                <div class="text-nexa-neon text-4xl mb-6">📅</div>
+                <h3 class="text-2xl font-bold mb-4">Agendamiento Médico 24/7</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">Sincronización total con Google Calendar o CRM médico. Los pacientes eligen especialidad y horario disponible.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Verificación de disponibilidad real</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Recordatorios automáticos de cita</li>
+                </ul>
+            </div>
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-white/10">
+                <div class="text-white text-4xl mb-6">🩺</div>
+                <h3 class="text-2xl font-bold mb-4">Triaje Inteligente</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">La IA realiza preguntas básicas de síntomas para clasificar la urgencia y derivar al especialista adecuado.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Cuestionarios médicos dinámicos</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Alertas de emergencia instantáneas</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 5: FAQ Específicas -->
+    <section class="py-24 px-6 max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-12 text-center">Preguntas del Sector Salud</h2>
+        <div class="space-y-4">
+            <details class="glass-card rounded-2xl border border-white/5 group">
+                <summary class="p-6 cursor-pointer font-bold flex justify-between items-center list-none">
+                    ¿Es segura la información de los pacientes?
+                    <span class="text-nexa-neon group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div class="px-6 pb-6 text-sm text-nexa-gray">
+                    Absolutamente. Utilizamos cifrado de extremo a extremo y cumplimos con los estándares de privacidad para datos de salud.
+                </div>
+            </details>
+            <details class="glass-card rounded-2xl border border-white/5 group">
+                <summary class="p-6 cursor-pointer font-bold flex justify-between items-center list-none">
+                    ¿Se integra con mi software médico actual?
+                    <span class="text-nexa-neon group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div class="px-6 pb-6 text-sm text-nexa-gray">
+                    Nuestra IA puede conectarse mediante API a la mayoría de CRMs médicos modernos para sincronizar citas y expedientes.
+                </div>
+            </details>
+        </div>
+    </section>
+
+
+    <!-- CTA -->
+    <section class="py-32 px-6 text-center">
+        <h2 class="text-4xl font-bold mb-8">¿Optimizar tu centro de salud?</h2>
+        <button onclick="window.location.href='/#contacto'" class="px-10 py-4 btn-neon font-bold rounded-full text-lg">Digitalizar mi clínica</button>
+    </section>
+
+    <footer class="py-12 text-center text-xs text-nexa-gray border-t border-white/5">
+        © 2026 NexaOps AI. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        // WhatsApp Simulation Logic
+        const chatBody = document.getElementById('sim-chat');
+        const messages = [
+            { text: "Hola, necesito agendar una cita con el Cardiólogo 🏥", type: "in" },
+            { text: "¡Hola! Con gusto. El Dr. García tiene disponible mañana a las 10:00 AM o 3:00 PM. ¿Cuál prefieres?", type: "out" },
+            { text: "A las 10:00 AM está bien.", type: "in" },
+            { text: "Perfecto. ¿Es para una consulta de rutina o presenta algún síntoma específico?", type: "out" },
+            { text: "Rutina.", type: "in" },
+            { text: "Cita confirmada para mañana a las 10:00 AM. Te enviamos la ubicación y recordatorio 2h antes. ✅", type: "out" }
+        ];
+
+        let msgIndex = 0;
+        function showNextMessage() {
+            if (msgIndex < messages.length) {
+                const m = messages[msgIndex];
+                const div = document.createElement('div');
+                div.className = `msg msg-${m.type}`;
+                div.innerText = m.text;
+                chatBody.appendChild(div);
+                setTimeout(() => div.classList.add('show'), 50);
+                msgIndex++;
+                setTimeout(showNextMessage, 2500);
+            } else {
+                setTimeout(() => {
+                    chatBody.innerHTML = '';
+                    msgIndex = 0;
+                    showNextMessage();
+                }, 5000);
+            }
+        }
+
+        // ROI Calculator Logic
+        const pacientesInput = document.getElementById('pacientes-input');
+        const gestionInput = document.getElementById('gestion-input');
+        const pacientesVal = document.getElementById('pacientes-val');
+        const gestionVal = document.getElementById('gestion-val');
+        const ahorroHoras = document.getElementById('ahorro-horas');
+
+        function updateROI() {
+            const pacientes = parseInt(pacientesInput.value);
+            const gestion = parseInt(gestionInput.value);
+            pacientesVal.innerText = pacientes;
+            gestionVal.innerText = `${gestion} min`;
+            
+            const horasAhorradas = Math.round((pacientes * gestion) / 60);
+            ahorroHoras.innerText = `${horasAhorradas}h`;
+        }
+
+        pacientesInput.addEventListener('input', updateROI);
+        gestionInput.addEventListener('input', updateROI);
+
+        // Scroll Reveal
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+
+        window.addEventListener("scroll", reveal);
+        window.onload = () => {
+            reveal();
+            showNextMessage();
+            updateROI();
+        };
+    </script>
+</body>
+</html>

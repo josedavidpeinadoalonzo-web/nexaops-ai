@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller Automotriz | Automatización NexaOps AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexa: { neon: '#d4ff00', dark: '#0a0a0a', card: '#111111', gray: '#888888' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #000; color: #fff; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .btn-neon { background-color: #d4ff00; color: #000; transition: all 0.3s; }
+        .btn-neon:hover { box-shadow: 0 0 20px rgba(212, 255, 0, 0.4); transform: translateY(-2px); }
+        .bg-grain::after {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05; pointer-events: none;
+        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* WhatsApp Simulator */
+        .phone-mockup {
+            width: 300px; height: 600px; background: #111; border: 8px solid #222;
+            border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .chat-header { background: #075e54; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .chat-body { background: #e5ddd5; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: all 0.5s; }
+        .msg-in { background: #fff; color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-out { background: #dcf8c6; color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.show { opacity: 1; transform: translateY(0); }
+
+        /* Comparison Table */
+        .comp-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .comp-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="fixed inset-0 z-[-1] bg-grain opacity-50"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-orange-500/10 to-transparent z-[-1]"></div>
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <img src="/assets/nexaops_logo_1777663415915.png" alt="NexaOps Logo" class="h-8 w-8 rounded-lg object-cover">
+                <div class="font-bold text-xl tracking-tighter">NexaOps<span class="text-nexa-neon">.</span></div>
+            </a>
+            <a href="/#casos" class="text-sm font-medium text-gray-400 hover:text-white transition">← Volver a Casos</a>
+        </div>
+    </nav>
+
+    <!-- Hero Caso -->
+    <header class="pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-center md:text-left">
+            <div class="inline-block px-4 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-widest mb-6">Sector Servicios</div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">Taller <span class="text-nexa-neon">Automotriz</span></h1>
+            <p class="text-lg text-nexa-gray max-w-2xl mb-8">Modernizamos la comunicación entre mecánicos y clientes, eliminando las llamadas constantes de seguimiento.</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs border-orange-500/20">
+                    <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span> Taller Digitalizado
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs">
+                    🛠️ Gestión de Flotas
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mejora 1: Simulador de WhatsApp -->
+        <div class="flex-shrink-0 reveal">
+            <div class="phone-mockup">
+                <div class="chat-header">
+                    <div class="w-8 h-8 rounded-full bg-gray-600"></div>
+                    <div class="text-xs font-bold">Taller IA Service</div>
+                </div>
+                <div class="chat-body" id="sim-chat">
+                    <!-- Mensajes se cargan por JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mejora 2: Comparativa -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">Transparencia Total</h2>
+            <p class="text-nexa-gray">Comparativa entre taller tradicional y taller NexaOps AI.</p>
+        </div>
+        <div class="max-w-4xl mx-auto glass-card rounded-3xl overflow-hidden border border-white/10">
+            <div class="grid grid-cols-2 bg-white/5 p-6 font-bold text-center border-b border-white/10">
+                <div class="text-gray-400">Taller Opaco</div>
+                <div class="text-nexa-neon">Taller NexaOps AI</div>
+            </div>
+            <div class="p-8 space-y-0 text-sm">
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Cliente llama 5 veces para saber si su carro está listo."</div>
+                    <div class="text-white font-medium">Auto-consulta de estatus por placa 24/7.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Presupuestos por voz que se olvidan o confunden."</div>
+                    <div class="text-white font-medium">Envío de presupuesto digital con botón de aprobación.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Pérdida de historial de mantenimiento."</div>
+                    <div class="text-white font-medium">Base de datos digital con recordatorios preventivos.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 3: Calculadora ROI -->
+    <section class="py-24 px-6 max-w-5xl mx-auto text-center reveal">
+        <h2 class="text-3xl font-bold mb-12">Calcula tu Productividad</h2>
+        <div class="glass-card p-10 rounded-3xl border border-nexa-neon/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-left space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Vehículos en Taller / Mes</label>
+                        <input type="range" id="carros-input" min="20" max="500" value="100" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>20</span><span id="carros-val" class="text-nexa-neon font-bold">100</span><span>500</span></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Llamadas de consulta por vehículo</label>
+                        <input type="range" id="llamadas-input" min="1" max="10" value="4" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>1</span><span id="llamadas-val" class="text-nexa-neon font-bold">4</span><span>10</span></div>
+                    </div>
+                </div>
+                <div class="bg-nexa-neon/10 p-8 rounded-2xl border border-nexa-neon/20">
+                    <div class="text-xs uppercase font-bold text-nexa-gray mb-2">Llamadas atendidas por la IA</div>
+                    <div class="text-5xl font-black text-nexa-neon mb-4" id="ahorro-llamadas">400</div>
+                    <div class="text-xs text-gray-400 leading-relaxed">Tu recepcionista o mecánicos dejarán de perder tiempo en el teléfono para enfocarse en reparar.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 4: Diagrama de Flujo -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <h2 class="text-3xl font-bold mb-16 text-center">El Camino de la Reparación</h2>
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">🚘</div>
+                <div class="text-xs font-bold">Ingreso Vehículo</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-orange-500/30 scale-110 bg-orange-500/5">
+                <div class="text-2xl mb-2">📲</div>
+                <div class="text-xs font-bold">Update IA</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">✅</div>
+                <div class="text-xs font-bold">Entrega y Pago</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Procesos Detallados (Antiguo) -->
+    <section class="py-20 px-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-16 text-center">Tecnología Automotriz</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-nexa-neon">
+                <div class="text-nexa-neon text-4xl mb-6">🚗</div>
+                <h3 class="text-2xl font-bold mb-4">Estatus en Tiempo Real</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">El cliente consulta la fase de su vehículo enviando su placa. La IA responde con fotos y detalles.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Reducción masiva de llamadas</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Notificaciones automáticas de "Listo"</li>
+                </ul>
+            </div>
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-white/10">
+                <div class="text-white text-4xl mb-6">🛠️</div>
+                <h3 class="text-2xl font-bold mb-4">Presupuestos Digitales</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">Envío de desglose de piezas y mano de obra para aprobación interactiva desde el chat.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Aprobación con un clic</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Sincronización con almacén</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 5: FAQ Específicas -->
+    <section class="py-24 px-6 max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-12 text-center">Preguntas de Talleres</h2>
+        <div class="space-y-4">
+            <details class="glass-card rounded-2xl border border-white/5 group">
+                <summary class="p-6 cursor-pointer font-bold flex justify-between items-center list-none">
+                    ¿Cómo sabe la IA en qué estado está el carro?
+                    <span class="text-nexa-neon group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div class="px-6 pb-6 text-sm text-nexa-gray">
+                    Tus mecánicos simplemente marcan un checklist rápido en nuestro Dashboard o envían una foto a un número interno. La IA traduce eso en un reporte amigable para el cliente.
+                </div>
+            </details>
+            <details class="glass-card rounded-2xl border border-white/5 group">
+                <summary class="p-6 cursor-pointer font-bold flex justify-between items-center list-none">
+                    ¿Se pueden enviar fotos de las piezas dañadas?
+                    <span class="text-nexa-neon group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div class="px-6 pb-6 text-sm text-nexa-gray">
+                    Sí, el sistema soporta envío de multimedia para que el cliente vea exactamente por qué necesita el cambio de repuesto, aumentando la confianza.
+                </div>
+            </details>
+        </div>
+    </section>
+
+
+    <!-- CTA -->
+    <section class="py-32 px-6 text-center">
+        <h2 class="text-4xl font-bold mb-8">¿Automatizar tu flujo de taller?</h2>
+        <button onclick="window.location.href='/#contacto'" class="px-10 py-4 btn-neon font-bold rounded-full text-lg">Digitalizar mi taller</button>
+    </section>
+
+    <footer class="py-12 text-center text-xs text-nexa-gray border-t border-white/5">
+        © 2026 NexaOps AI. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        // WhatsApp Simulation Logic
+        const chatBody = document.getElementById('sim-chat');
+        const messages = [
+            { text: "Hola, ¿cómo va mi carro? Placa: AB123CD 🚗", type: "in" },
+            { text: "¡Hola! Tu vehículo está en la fase de 'Instalación de Repuestos'. El mecánico ya recibió el kit de frenos. 🛠️", type: "out" },
+            { text: "Perfecto. ¿Creen que esté listo hoy?", type: "in" },
+            { text: "Sí, estimamos la entrega para las 4:30 PM. Te enviaré un mensaje automático apenas esté listo para retirar. ✅", type: "out" },
+            { text: "Excelente servicio, gracias.", type: "in" },
+            { text: "¡A la orden! Aquí puedes ver una foto de los frenos nuevos instalados: [Imagen].", type: "out" }
+        ];
+
+        let msgIndex = 0;
+        function showNextMessage() {
+            if (msgIndex < messages.length) {
+                const m = messages[msgIndex];
+                const div = document.createElement('div');
+                div.className = `msg msg-${m.type}`;
+                div.innerText = m.text;
+                chatBody.appendChild(div);
+                setTimeout(() => div.classList.add('show'), 50);
+                msgIndex++;
+                setTimeout(showNextMessage, 2500);
+            } else {
+                setTimeout(() => {
+                    chatBody.innerHTML = '';
+                    msgIndex = 0;
+                    showNextMessage();
+                }, 5000);
+            }
+        }
+
+        // ROI Calculator Logic
+        const carrosInput = document.getElementById('carros-input');
+        const llamadasInput = document.getElementById('llamadas-input');
+        const carrosVal = document.getElementById('carros-val');
+        const llamadasVal = document.getElementById('llamadas-val');
+        const ahorroLlamadas = document.getElementById('ahorro-llamadas');
+
+        function updateROI() {
+            const carros = parseInt(carrosInput.value);
+            const llamadas = parseInt(llamadasInput.value);
+            carrosVal.innerText = carros;
+            llamadasVal.innerText = llamadas;
+            
+            const totalLlamadas = carros * llamadas;
+            ahorroLlamadas.innerText = totalLlamadas.toLocaleString();
+        }
+
+        carrosInput.addEventListener('input', updateROI);
+        llamadasInput.addEventListener('input', updateROI);
+
+        // Scroll Reveal
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+
+        window.addEventListener("scroll", reveal);
+        window.onload = () => {
+            reveal();
+            showNextMessage();
+            updateROI();
+        };
+    </script>
+</body>
+</html>

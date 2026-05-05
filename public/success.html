@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Pago Exitoso! - NexaOps AI</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        body { background: #000; color: #fff; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+        .success-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 3rem; border-radius: 2rem; border: 1px solid #d4ff00; max-width: 500px; width: 90%; }
+        .icon { font-size: 4rem; color: #d4ff00; margin-bottom: 1rem; }
+        h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        p { color: #888; margin-bottom: 2rem; }
+        .btn-neon { background: #d4ff00; color: #000; padding: 1rem 2rem; border-radius: 1rem; font-weight: bold; text-decoration: none; display: inline-block; transition: transform 0.2s; }
+        .btn-neon:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="success-card">
+        <div class="icon">✓</div>
+        <h1>¡Bienvenido a NexaOps!</h1>
+        <p>Tu pago ha sido procesado exitosamente. En unos minutos recibirás un mensaje de bienvenida en tu WhatsApp con las instrucciones para configurar tu bot.</p>
+        <a href="/" class="btn-neon">Volver al Inicio</a>
+    </div>
+
+    <script>
+        // Podríamos extraer el session_id de la URL si quisiéramos mostrar datos específicos
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        console.log('Checkout completed for session:', sessionId);
+    </script>
+</body>
+</html>

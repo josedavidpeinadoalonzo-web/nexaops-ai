@@ -14,12 +14,107 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadData() {
     await Promise.all([
         loadStats(),
+        loadRealtimeMetrics(),
         loadRecentProjects(),
         loadClients(),
         loadProjects(),
         loadIncome(),
-        loadTasks()
+        loadTasks(),
+        loadAgentManager()
     ]);
+}
+
+async function loadRealtimeMetrics() {
+    try {
+        const res = await fetch(`${API_URL}/admin/metrics`);
+        if (!res.ok) throw new Error('Metrics not available');
+        const data = await res.json();
+        
+        document.getElementById('realtime-metrics').classList.remove('hidden');
+        document.getElementById('metric-mrr').textContent = `$${data.mrr.toFixed(2)}`;
+        document.getElementById('metric-subs').textContent = data.activeCustomers;
+        document.getElementById('metric-conv').textContent = data.conversionRate;
+    } catch (e) {
+        console.log('Stripe metrics not loaded - keys probably missing');
+    }
+}
+
+async function loadAgentManager() {
+    // Definimos los agentes core para el Dashboard
+    const coreAgents = [
+        { id: 'sofia', name: 'Sofía', role: 'Ventas y Captación', emoji: '💃', desc: 'Atiende WhatsApp, califica leads y cierra ventas.' },
+        { id: 'carlos', name: 'Carlos', role: 'Soporte Técnico', emoji: '👨‍🔧', desc: 'Resuelve dudas de clientes existentes sobre sus proyectos.' },
+        { id: 'ana', name: 'Ana', role: 'Copywriter & Estrategia', emoji: '✍️', desc: 'Crea contenido persuasivo y diseña propuestas comerciales.' }
+    ];
+
+    const grid = document.getElementById('agent-manager-grid');
+    if (!grid) return;
+
+    grid.innerHTML = coreAgents.map(agent => `
+        <div class="card p-6 rounded-2xl bg-gray-800/50 border border-gray-700 flex flex-col">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">${agent.emoji}</span>
+                <div>
+                    <h4 class="font-bold">${agent.name}</h4>
+                    <p class="text-xs text-indigo-400 font-medium">${agent.role}</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-400 mb-6 flex-1">${agent.desc}</p>
+            <div class="flex gap-2">
+                <button onclick="editAgentPrompt('${agent.name}')" class="flex-1 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs font-bold transition-colors">
+                    Editar Prompt
+                </button>
+                <button onclick="testAgent('${agent.name}')" class="px-3 py-2 rounded-lg bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/40 transition-colors">
+                    ⚙️
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function editAgentPrompt(name) {
+    const currentPrompt = ''; // Idealmente cargaríamos el prompt actual aquí
+    const prompt = window.prompt(`Introduce el nuevo System Prompt para ${name}:`, currentPrompt);
+    if (prompt === null) return;
+
+    try {
+        let res;
+        if (name === 'Sofía') {
+            // Caso especial: Sofía es el bot de WhatsApp, usamos su endpoint específico
+            res = await fetch(`${API_URL}/whatsapp/bot-config`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    systemPrompt: prompt,
+                    mode: 'ai', // Forzamos modo IA para Sofía
+                    deployedBy: 'dashboard-admin'
+                })
+            });
+        } else {
+            // Caso general para otros agentes
+            res = await fetch(`${API_URL}/agents/${name}/prompts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, deployedBy: 'dashboard-admin' })
+            });
+        }
+        
+        if (res.ok) {
+            alert(`Prompt de ${name} actualizado correctamente.`);
+            loadData();
+        } else {
+            const err = await res.json();
+            alert(`Error: ${err.error || 'No se pudo actualizar'}`);
+        }
+    } catch (e) {
+        alert('Error de conexión al actualizar el prompt.');
+    }
+}
+
+function testAgent(name) {
+    showSection('agents');
+    // Simulamos selección en el iframe si fuera posible, o solo informamos
+    console.log(`Cambiando a entorno de pruebas para ${name}`);
 }
 
 async function loadStats() {

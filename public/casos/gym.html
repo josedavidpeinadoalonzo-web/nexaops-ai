@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Gym | Automatización NexaOps AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexa: { neon: '#d4ff00', dark: '#0a0a0a', card: '#111111', gray: '#888888' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #000; color: #fff; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .btn-neon { background-color: #d4ff00; color: #000; transition: all 0.3s; }
+        .btn-neon:hover { box-shadow: 0 0 20px rgba(212, 255, 0, 0.4); transform: translateY(-2px); }
+        .bg-grain::after {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05; pointer-events: none;
+        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* WhatsApp Simulator */
+        .phone-mockup {
+            width: 300px; height: 600px; background: #111; border: 8px solid #222;
+            border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .chat-header { background: #075e54; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .chat-body { background: #e5ddd5; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: all 0.5s; }
+        .msg-in { background: #fff; color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-out { background: #dcf8c6; color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.show { opacity: 1; transform: translateY(0); }
+
+        /* Comparison Table */
+        .comp-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .comp-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="fixed inset-0 z-[-1] bg-grain opacity-50"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-nexa-neon/10 to-transparent z-[-1]"></div>
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <img src="/assets/nexaops_logo_1777663415915.png" alt="NexaOps Logo" class="h-8 w-8 rounded-lg object-cover">
+                <div class="font-bold text-xl tracking-tighter">NexaOps<span class="text-nexa-neon">.</span></div>
+            </a>
+            <a href="/#casos" class="text-sm font-medium text-gray-400 hover:text-white transition">← Volver a Casos</a>
+        </div>
+    </nav>
+
+    <!-- Hero Caso -->
+    <header class="pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-center md:text-left">
+            <div class="inline-block px-4 py-1 rounded-full bg-nexa-neon/10 border border-nexa-neon/20 text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-6">Sector Wellness</div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">Smart <span class="text-nexa-neon">Gym</span></h1>
+            <p class="text-lg text-nexa-gray max-w-2xl mb-8">Automatizamos inscripciones, reservas de clases y cobranza para que te enfoques en el entrenamiento.</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs border-nexa-neon/20">
+                    <span class="w-2 h-2 rounded-full bg-nexa-neon animate-pulse"></span> Gimnasio Conectado
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs">
+                    💪 Gestión de Socios
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mejora 1: Simulador de WhatsApp -->
+        <div class="flex-shrink-0 reveal">
+            <div class="phone-mockup">
+                <div class="chat-header">
+                    <div class="w-8 h-8 rounded-full bg-gray-600"></div>
+                    <div class="text-xs font-bold">Smart Gym Bot</div>
+                </div>
+                <div class="chat-body" id="sim-chat">
+                    <!-- Mensajes se cargan por JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mejora 2: Comparativa -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">Gimnasio de Alto Rendimiento</h2>
+            <p class="text-nexa-gray">Comparativa entre gestión manual y Smart Gym con NexaOps AI.</p>
+        </div>
+        <div class="max-w-4xl mx-auto glass-card rounded-3xl overflow-hidden border border-white/10">
+            <div class="grid grid-cols-2 bg-white/5 p-6 font-bold text-center border-b border-white/10">
+                <div class="text-gray-400">Gym Tradicional</div>
+                <div class="text-nexa-neon">Smart Gym AI</div>
+            </div>
+            <div class="p-8 space-y-0 text-sm">
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Cola en recepción para inscribirse o pagar mensualidad."</div>
+                    <div class="text-white font-medium">Inscripción y pago digital por WhatsApp en 1 min.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Socios que entrenan con meses de morosidad."</div>
+                    <div class="text-white font-medium">Bloqueo de acceso y recordatorios automáticos de cobro.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Clases de CrossFit sobrepobladas por falta de control."</div>
+                    <div class="text-white font-medium">Sistema de reserva de cupos por chat con lista de espera.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 3: Calculadora ROI -->
+    <section class="py-24 px-6 max-w-5xl mx-auto text-center reveal">
+        <h2 class="text-3xl font-bold mb-12">Calcula la Retención de Socios</h2>
+        <div class="glass-card p-10 rounded-3xl border border-nexa-neon/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-left space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Número de Socios Activos</label>
+                        <input type="range" id="socios-input" min="50" max="2000" value="300" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>50</span><span id="socios-val" class="text-nexa-neon font-bold">300</span><span>2000</span></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Mensualidad Promedio ($)</label>
+                        <input type="range" id="cuota-input" min="10" max="100" step="5" value="35" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>$10</span><span id="cuota-val" class="text-nexa-neon font-bold">$35</span><span>$100</span></div>
+                    </div>
+                </div>
+                <div class="bg-nexa-neon/10 p-8 rounded-2xl border border-nexa-neon/20">
+                    <div class="text-xs uppercase font-bold text-nexa-gray mb-2">Ingresos Recuperados por Morosidad (Estimado)</div>
+                    <div class="text-5xl font-black text-nexa-neon mb-4" id="ahorro-dinero">$1,050</div>
+                    <div class="text-xs text-gray-400 leading-relaxed">Nuestra IA recupera hasta un 15% de los ingresos perdidos por olvidos en el pago.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 4: Diagrama de Flujo -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <h2 class="text-3xl font-bold mb-16 text-center">El Flow del Socio</h2>
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">🎟️</div>
+                <div class="text-xs font-bold">Reserva Clase</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-nexa-neon/30 scale-110 bg-nexa-neon/5">
+                <div class="text-2xl mb-2">🤖</div>
+                <div class="text-xs font-bold">Validación IA</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">🏋️</div>
+                <div class="text-xs font-bold">Acceso Gym</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Procesos Detallados -->
+    <section class="py-20 px-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-16 text-center">Tecnología Wellness</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-nexa-neon">
+                <div class="text-nexa-neon text-4xl mb-6">📝</div>
+                <h3 class="text-2xl font-bold mb-4">Inscripciones Autónomas</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">El socio se registra, elige su plan y paga por WhatsApp. La IA le otorga su código de acceso al instante.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Zero fricción de entrada</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Gestión de contratos digital</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Motivación diaria automatizada</li>
+                </ul>
+            </div>
+
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-white/10">
+                <div class="text-white text-4xl mb-6">🚨</div>
+                <h3 class="text-2xl font-bold mb-4">Recuperación de Morosidad</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">El sistema detecta pagos vencidos y envía recordatorios amigables, bloqueando el acceso si no se regulariza.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-white">✓</span> Cobro recurrente automatizado</li>
+                    <li class="flex items-center gap-2"><span class="text-white">✓</span> Reintento de cobro automático</li>
+                    <li class="flex items-center gap-2"><span class="text-white">✓</span> Reducción de tasa de deserción</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-32 px-6 text-center">
+        <h2 class="text-4xl font-bold mb-8">¿Escalar tu gimnasio con IA?</h2>
+        <button onclick="window.location.href='/#contacto'" class="px-10 py-4 btn-neon font-bold rounded-full text-lg">Digitalizar mi gym</button>
+    </section>
+
+    <footer class="py-12 text-center text-xs text-nexa-gray border-t border-white/5">
+        © 2026 NexaOps AI. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        // WhatsApp Simulation Logic
+        const chatBody = document.getElementById('sim-chat');
+        const messages = [
+            { text: "Hola, quiero inscribirme al gimnasio 💪", type: "in" },
+            { text: "¡Hola! Bienvenido. Tenemos Plan Básico ($20) y Plan VIP ($35). ¿Cuál prefieres?", type: "out" },
+            { text: "El Plan VIP.", type: "in" },
+            { text: "Excelente. Incluye acceso 24/7 y sauna. ¿Deseas pagar con tarjeta o Pago Móvil?", type: "out" },
+            { text: "Tarjeta de crédito.", type: "in" },
+            { text: "Perfecto. Aquí tienes tu link de inscripción seguro: [Link]. Al completar, recibirás tu código QR de acceso. ✅", type: "out" }
+        ];
+
+        let msgIndex = 0;
+        function showNextMessage() {
+            if (msgIndex < messages.length) {
+                const m = messages[msgIndex];
+                const div = document.createElement('div');
+                div.className = `msg msg-${m.type}`;
+                div.innerText = m.text;
+                chatBody.appendChild(div);
+                setTimeout(() => div.classList.add('show'), 50);
+                msgIndex++;
+                setTimeout(showNextMessage, 2500);
+            } else {
+                setTimeout(() => {
+                    chatBody.innerHTML = '';
+                    msgIndex = 0;
+                    showNextMessage();
+                }, 5000);
+            }
+        }
+
+        // ROI Calculator Logic
+        const sociosInput = document.getElementById('socios-input');
+        const cuotaInput = document.getElementById('cuota-input');
+        const sociosVal = document.getElementById('socios-val');
+        const cuotaVal = document.getElementById('cuota-val');
+        const ahorroDinero = document.getElementById('ahorro-dinero');
+
+        function updateROI() {
+            const socios = parseInt(sociosInput.value);
+            const cuota = parseInt(cuotaInput.value);
+            sociosVal.innerText = socios;
+            cuotaVal.innerText = `$${cuota}`;
+            
+            // Suponemos recuperamos un 10% de morosidad
+            const dineroRecuperado = Math.round((socios * cuota) * 0.10);
+            ahorroDinero.innerText = `$${dineroRecuperado.toLocaleString()}`;
+        }
+
+        sociosInput.addEventListener('input', updateROI);
+        cuotaInput.addEventListener('input', updateROI);
+
+        // Scroll Reveal
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+
+        window.addEventListener("scroll", reveal);
+        window.onload = () => {
+            reveal();
+            showNextMessage();
+            updateROI();
+        };
+    </script>
+</body>
+</html>

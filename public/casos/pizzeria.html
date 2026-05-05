@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzería Tech | Automatización NexaOps AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexa: { neon: '#d4ff00', dark: '#0a0a0a', card: '#111111', gray: '#888888' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #000; color: #fff; overflow-x: hidden; }
+        .glass-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .btn-neon { background-color: #d4ff00; color: #000; transition: all 0.3s; }
+        .btn-neon:hover { box-shadow: 0 0 20px rgba(212, 255, 0, 0.4); transform: translateY(-2px); }
+        .bg-grain::after {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05; pointer-events: none;
+        }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* WhatsApp Simulator */
+        .phone-mockup {
+            width: 300px; height: 600px; background: #111; border: 8px solid #222;
+            border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .chat-header { background: #075e54; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .chat-body { background: #e5ddd5; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: all 0.5s; }
+        .msg-in { background: #fff; color: #000; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-out { background: #dcf8c6; color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg.show { opacity: 1; transform: translateY(0); }
+
+        /* Comparison Table */
+        .comp-row { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .comp-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="fixed inset-0 z-[-1] bg-grain opacity-50"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-nexa-neon/10 to-transparent z-[-1]"></div>
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <img src="/assets/nexaops_logo_1777663415915.png" alt="NexaOps Logo" class="h-8 w-8 rounded-lg object-cover">
+                <div class="font-bold text-xl tracking-tighter">NexaOps<span class="text-nexa-neon">.</span></div>
+            </a>
+            <a href="/#casos" class="text-sm font-medium text-gray-400 hover:text-white transition">← Volver a Casos</a>
+        </div>
+    </nav>
+
+    <!-- Hero Caso -->
+    <header class="pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div class="flex-1 text-center md:text-left">
+            <div class="inline-block px-4 py-1 rounded-full bg-nexa-neon/10 border border-nexa-neon/20 text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-6">Sector Gastronómico</div>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">Pizzería <span class="text-nexa-neon">Tech</span></h1>
+            <p class="text-lg text-nexa-gray max-w-2xl mb-8">Transformamos la atención al cliente de una pizzería tradicional en un sistema autónomo de ventas 24/7 por WhatsApp.</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs border-nexa-neon/20">
+                    <span class="w-2 h-2 rounded-full bg-nexa-neon animate-pulse"></span> Sistema Activo
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 glass-card rounded-full text-xs">
+                    ⭐ 4.9/5 Calificación
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mejora 1: Simulador de WhatsApp -->
+        <div class="flex-shrink-0 reveal">
+            <div class="phone-mockup">
+                <div class="chat-header">
+                    <div class="w-8 h-8 rounded-full bg-gray-600"></div>
+                    <div class="text-xs font-bold">Pizzería Tech Bot</div>
+                </div>
+                <div class="chat-body" id="sim-chat">
+                    <!-- Mensajes se cargan por JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mejora 2: Comparativa -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4">El Cambio Radical</h2>
+            <p class="text-nexa-gray">Comparativa entre el modelo tradicional y el sistema NexaOps AI.</p>
+        </div>
+        <div class="max-w-4xl mx-auto glass-card rounded-3xl overflow-hidden border border-white/10">
+            <div class="grid grid-cols-2 bg-white/5 p-6 font-bold text-center border-b border-white/10">
+                <div class="text-gray-400">Modelo Tradicional</div>
+                <div class="text-nexa-neon">NexaOps AI System</div>
+            </div>
+            <div class="p-8 space-y-0 text-sm">
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Espera en línea de 5 a 10 minutos para ser atendido."</div>
+                    <div class="text-white font-medium">Respuesta instantánea garantizada (0.5s).</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Errores frecuentes en ingredientes o dirección."</div>
+                    <div class="text-white font-medium">0% error humano. Validación GPS integrada.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Ventas perdidas después de las 11 PM."</div>
+                    <div class="text-white font-medium">Atención y ventas 24/7 sin descanso.</div>
+                </div>
+                <div class="grid grid-cols-2 comp-row py-6 gap-8">
+                    <div class="text-gray-400 italic">"Gestión manual de pagos y facturas."</div>
+                    <div class="text-white font-medium">Conciliación automática y recibo digital.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 3: Calculadora ROI -->
+    <section class="py-24 px-6 max-w-5xl mx-auto text-center reveal">
+        <h2 class="text-3xl font-bold mb-12">Calcula tu Ahorro Estimado</h2>
+        <div class="glass-card p-10 rounded-3xl border border-nexa-neon/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-left space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Pedidos Mensuales</label>
+                        <input type="range" id="pedidos-input" min="100" max="5000" value="500" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>100</span><span id="pedidos-val" class="text-nexa-neon font-bold">500</span><span>5000</span></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-nexa-gray mb-3">Tiempo de atención manual (min)</label>
+                        <input type="range" id="tiempo-input" min="2" max="15" value="6" class="w-full accent-nexa-neon">
+                        <div class="flex justify-between text-xs mt-2 text-nexa-gray"><span>2 min</span><span id="tiempo-val" class="text-nexa-neon font-bold">6 min</span><span>15 min</span></div>
+                    </div>
+                </div>
+                <div class="bg-nexa-neon/10 p-8 rounded-2xl border border-nexa-neon/20">
+                    <div class="text-xs uppercase font-bold text-nexa-gray mb-2">Horas de personal ahorradas</div>
+                    <div class="text-5xl font-black text-nexa-neon mb-4" id="ahorro-horas">50h</div>
+                    <div class="text-xs text-gray-400 leading-relaxed">Liberarás a tu equipo para que se enfoque en la calidad de la pizza mientras la IA vende.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 4: Diagrama de Flujo -->
+    <section class="py-24 px-6 bg-white/[0.02]">
+        <h2 class="text-3xl font-bold mb-16 text-center">El Flujo de la Inteligencia</h2>
+        <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">📱</div>
+                <div class="text-xs font-bold">Cliente escribe</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-nexa-neon/30 scale-110 bg-nexa-neon/5">
+                <div class="text-2xl mb-2">🤖</div>
+                <div class="text-xs font-bold">IA NexaOps</div>
+            </div>
+            <div class="hidden md:block text-nexa-neon text-center">→</div>
+            <div class="glass-card p-6 rounded-2xl text-center border-white/10">
+                <div class="text-2xl mb-2">🍕</div>
+                <div class="text-xs font-bold">Pedido al Dash</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Procesos Detallados (Antiguo) -->
+    <section class="py-24 px-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-16 text-center">Tecnología de Vanguardia</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-nexa-neon">
+                <div class="text-nexa-neon text-4xl mb-6">🍕</div>
+                <h3 class="text-2xl font-bold mb-4">Toma de Pedidos Inteligente</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">La IA guía al cliente a través del menú, permite personalizar ingredientes y gestiona extras sin intervención humana.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Menú interactivo dinámico</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Manejo de promociones automáticas</li>
+                </ul>
+            </div>
+            <div class="glass-card p-10 rounded-3xl reveal border-t-4 border-t-white/10">
+                <div class="text-white text-4xl mb-6">📍</div>
+                <h3 class="text-2xl font-bold mb-4">Gestión de Delivery y Ubicación</h3>
+                <p class="text-nexa-gray leading-relaxed mb-6">Captura la ubicación por GPS, calcula el costo de envío y asigna la orden a la sucursal más cercana.</p>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Validación de dirección por GPS</li>
+                    <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Notificación automática a motorizados</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mejora 5: FAQ Específicas -->
+    <section class="py-24 px-6 max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold mb-12 text-center">Dudas frecuentes (Gastronomía)</h2>
+        <div class="space-y-4">
+            <details class="glass-card rounded-2xl border border-white/5 group">
+                <summary class="p-6 cursor-pointer font-bold flex justify-between items-center list-none">
+                    ¿Qué pasa si un ingrediente se agota?
+                    <span class="text-nexa-neon group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div class="px-6 pb-6 text-sm text-nexa-gray">
+                    El sistema se sincroniza con tu inventario. Si marcas un item como agotado en el Dashboard, la IA dejará de ofrecerlo instantáneamente.
+                </div>
+            </details>
+            <details class="glass-card rounded-2xl border border-white/5 group">
+                <summary class="p-6 cursor-pointer font-bold flex justify-between items-center list-none">
+                    ¿Funciona con varias sucursales?
+                    <span class="text-nexa-neon group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <div class="px-6 pb-6 text-sm text-nexa-gray">
+                    Sí, la IA detecta la ubicación del cliente y deriva el pedido a la cocina de la sucursal que esté dentro del rango de delivery.
+                </div>
+            </details>
+        </div>
+    </section>
+
+
+    <!-- CTA -->
+    <section class="py-32 px-6 text-center">
+        <h2 class="text-4xl font-bold mb-8">¿Quieres resultados similares?</h2>
+        <button onclick="window.location.href='/#contacto'" class="px-10 py-4 btn-neon font-bold rounded-full text-lg">Digitalizar mi negocio</button>
+    </section>
+
+    <footer class="py-12 text-center text-xs text-nexa-gray border-t border-white/5">
+        © 2026 NexaOps AI. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        // WhatsApp Simulation Logic
+        const chatBody = document.getElementById('sim-chat');
+        const messages = [
+            { text: "¡Hola! Quiero una pizza familiar de Pepperoni 🍕", type: "in" },
+            { text: "¡Excelente elección! 😋 ¿Deseas agregar borde de queso por solo $2?", type: "out" },
+            { text: "Sí, por favor. Y una Coca-Cola de 1.5L", type: "in" },
+            { text: "Perfecto. Total: $18.50. ¿Deseas pagar con Pago Móvil o Stripe? 💳", type: "out" },
+            { text: "Stripe", type: "in" },
+            { text: "Aquí tienes tu link de pago seguro: [Link]. ¡Tu pizza entrará al horno en cuanto confirmes!", type: "out" }
+        ];
+
+        let msgIndex = 0;
+        function showNextMessage() {
+            if (msgIndex < messages.length) {
+                const m = messages[msgIndex];
+                const div = document.createElement('div');
+                div.className = `msg msg-${m.type}`;
+                div.innerText = m.text;
+                chatBody.appendChild(div);
+                setTimeout(() => div.classList.add('show'), 50);
+                msgIndex++;
+                setTimeout(showNextMessage, 2500);
+            } else {
+                setTimeout(() => {
+                    chatBody.innerHTML = '';
+                    msgIndex = 0;
+                    showNextMessage();
+                }, 5000);
+            }
+        }
+
+        // ROI Calculator Logic
+        const pedidosInput = document.getElementById('pedidos-input');
+        const tiempoInput = document.getElementById('tiempo-input');
+        const pedidosVal = document.getElementById('pedidos-val');
+        const tiempoVal = document.getElementById('tiempo-val');
+        const ahorroHoras = document.getElementById('ahorro-horas');
+
+        function updateROI() {
+            const pedidos = parseInt(pedidosInput.value);
+            const tiempo = parseInt(tiempoInput.value);
+            pedidosVal.innerText = pedidos;
+            tiempoVal.innerText = `${tiempo} min`;
+            
+            const horasAhorradas = Math.round((pedidos * tiempo) / 60);
+            ahorroHoras.innerText = `${horasAhorradas}h`;
+        }
+
+        pedidosInput.addEventListener('input', updateROI);
+        tiempoInput.addEventListener('input', updateROI);
+
+        // Scroll Reveal
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+
+        window.addEventListener("scroll", reveal);
+        window.onload = () => {
+            reveal();
+            showNextMessage();
+            updateROI();
+        };
+    </script>
+</body>
+</html>

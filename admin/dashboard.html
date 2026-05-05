@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | NexaOps AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const session = localStorage.getItem('nexa_session');
+            if (!session) {
+                window.location.href = '/login.html';
+            }
+        })();
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nexa: { neon: '#d4ff00', dark: '#050508', card: '#0f0f13', border: '#1e1e26' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #050508; color: #fff; scrollbar-width: thin; scrollbar-color: #1e1e26 transparent; font-family: 'Inter', sans-serif; }
+        .glass-card { background: #0f0f13; border: 1px solid #1e1e26; transition: all 0.3s; }
+        .glass-card:hover { border-color: #d4ff0033; }
+        .sidebar-link { transition: all 0.2s; border-radius: 12px; cursor: pointer; }
+        .sidebar-link:hover { background: rgba(212, 255, 0, 0.1); color: #d4ff00; }
+        .sidebar-link.active { background: #d4ff00; color: #000; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e1e26; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4ff0055; }
+        .stat-glow { filter: drop-shadow(0 0 10px rgba(212, 255, 0, 0.2)); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 border-r border-nexa-border p-6 flex flex-col gap-8 fixed h-full bg-nexa-dark z-20">
+        <div class="flex items-center gap-3 px-2">
+            <div class="w-8 h-8 bg-nexa-neon rounded-lg flex items-center justify-center text-black font-black">N</div>
+            <span class="font-bold text-xl tracking-tighter">NexaOps<span class="text-nexa-neon">.</span></span>
+        </div>
+
+        <nav class="flex flex-col gap-2">
+            <div onclick="switchView('general')" class="sidebar-link active flex items-center gap-3 px-4 py-3 text-sm font-semibold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                General
+            </div>
+            <div onclick="window.location.href='/portal'" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Portal de Agentes (IA)
+            </div>
+            <div onclick="switchView('bots')" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                Configuración Bots
+            </div>
+            <div onclick="switchView('leads')" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Leads
+            </div>
+            <div onclick="switchView('stats')" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Estadísticas (Métricas)
+            </div>
+        </nav>
+
+        <div class="mt-auto">
+            <div class="glass-card p-4 rounded-2xl border border-nexa-neon/10 bg-nexa-neon/5">
+                <div class="text-xs font-bold text-nexa-neon uppercase mb-2">Estado: Online</div>
+                <div class="text-[10px] text-gray-400 mb-3">Sistemas NexaOps operando</div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div class="w-full h-full bg-nexa-neon"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1 p-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-10">
+            <div>
+                <h1 class="text-3xl font-bold" id="main-title">Panel Administrativo 👋</h1>
+                <p class="text-gray-400 text-sm mt-1" id="main-subtitle">Resumen de actividad de tus agentes de IA.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 bg-nexa-card p-1 pr-4 border border-nexa-border rounded-full">
+                    <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center font-bold" id="user-avatar">A</div>
+                    <span class="text-sm font-semibold" id="user-name">Admin Account</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- View: General -->
+        <div id="view-general" class="dashboard-view">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="glass-card p-6 rounded-3xl">
+                    <div class="text-gray-400 text-xs font-bold uppercase mb-4 stat-label">Clientes</div>
+                    <div class="text-3xl font-black text-white stat-glow" id="stat-1">0</div>
+                </div>
+                <div class="glass-card p-6 rounded-3xl">
+                    <div class="text-gray-400 text-xs font-bold uppercase mb-4 stat-label">Proyectos</div>
+                    <div class="text-3xl font-black text-white" id="stat-2">0</div>
+                </div>
+                <div class="glass-card p-6 rounded-3xl">
+                    <div class="text-gray-400 text-xs font-bold uppercase mb-4 stat-label">Tareas</div>
+                    <div class="text-3xl font-black text-white" id="stat-3">0</div>
+                </div>
+                <div class="glass-card p-6 rounded-3xl border-nexa-neon/20">
+                    <div class="text-nexa-neon text-xs font-bold uppercase mb-4 stat-label">Ingresos</div>
+                    <div class="text-3xl font-black text-white" id="stat-4">$0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 glass-card p-8 rounded-3xl">
+                    <h2 class="font-bold text-lg mb-6 text-indigo-400">Tráfico Semanal de Agentes</h2>
+                    <div id="activityChart"></div>
+                </div>
+                <div class="glass-card p-8 rounded-3xl flex flex-col">
+                    <h2 class="font-bold text-lg mb-6 text-nexa-neon">Log de Agentes</h2>
+                    <div class="space-y-6 flex-1 overflow-y-auto max-h-[400px]" id="activityLog"></div>
+                </div>
+            </div>
+
+            <section class="mt-10 glass-card rounded-3xl overflow-hidden">
+                <div class="p-6 border-b border-nexa-border flex items-center justify-between">
+                    <h2 class="font-bold text-lg text-nexa-neon">Staff de Agentes de IA</h2>
+                </div>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-white/5 text-gray-400 font-medium">
+                        <tr>
+                            <th class="px-6 py-4">Agente</th>
+                            <th class="px-6 py-4">Rol en la Compañía</th>
+                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-6 py-4 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body" class="divide-y divide-nexa-border">
+                        <!-- Loaded from API -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <!-- View: Bots Config -->
+        <div id="view-bots" class="dashboard-view hidden">
+            <h2 class="text-2xl font-bold mb-6 text-nexa-neon">Configuración de Inteligencia Artificial</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="bots-grid">
+                <div class="glass-card p-8 rounded-3xl border-nexa-neon/10">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-nexa-neon/20 rounded-xl flex items-center justify-center text-2xl">🤖</div>
+                        <span class="px-2 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full">ACTIVO</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">WhatsApp Bot Pro</h3>
+                    <p class="text-gray-400 text-sm mb-6">Motor de atención al cliente y cierre de ventas automatizado.</p>
+                    <div class="flex flex-col gap-3">
+                        <textarea id="prompt-input" class="w-full bg-nexa-dark border border-nexa-border rounded-xl p-4 text-xs h-32 focus:border-nexa-neon outline-none" placeholder="Ingresa el system prompt del bot...">Eres un asistente experto en ventas para NexaOps AI...</textarea>
+                        <button onclick="savePrompt()" class="w-full py-3 bg-nexa-neon text-black rounded-xl font-bold hover:scale-[1.02] transition">Actualizar Prompt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Leads -->
+        <div id="view-leads" class="dashboard-view hidden">
+            <h2 class="text-2xl font-bold mb-6">Prospectos Captados</h2>
+            <div class="glass-card rounded-3xl overflow-hidden">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-white/5 text-gray-400 font-medium">
+                        <tr><th class="px-6 py-4">Lead</th><th class="px-6 py-4">Descripción</th><th class="px-6 py-4">Fecha</th></tr>
+                    </thead>
+                    <tbody id="leads-table-body" class="divide-y divide-nexa-border"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- View: Estadísticas (Restored & Improved) -->
+        <div id="view-stats" class="dashboard-view hidden">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold">Métricas de Rendimiento (IA)</h2>
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-white/5 border border-nexa-border rounded-xl text-xs font-bold">Exportar PDF</button>
+                    <button class="px-4 py-2 bg-nexa-neon text-black rounded-xl text-xs font-bold">Actualizar Datos</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="glass-card p-6 rounded-3xl">
+                    <div class="text-gray-400 text-[10px] font-bold uppercase mb-2">Eficiencia de Respuesta</div>
+                    <div class="text-2xl font-bold">98.4%</div>
+                    <div class="w-full h-1 bg-white/5 rounded-full mt-3"><div class="bg-nexa-neon h-full" style="width:98%"></div></div>
+                </div>
+                <div class="glass-card p-6 rounded-3xl">
+                    <div class="text-gray-400 text-[10px] font-bold uppercase mb-2">Tokens Consumidos (Hoy)</div>
+                    <div class="text-2xl font-bold">142.5k</div>
+                    <div class="text-[10px] text-gray-500 mt-2">Costo estimado: $2.84</div>
+                </div>
+                <div class="glass-card p-6 rounded-3xl">
+                    <div class="text-gray-400 text-[10px] font-bold uppercase mb-2">Tareas Automatizadas</div>
+                    <div class="text-2xl font-bold">1,024</div>
+                    <div class="text-[10px] text-green-500 mt-2">+15% vs ayer</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card p-8 rounded-3xl">
+                    <h3 class="font-bold mb-6">Uso de Modelos</h3>
+                    <div id="modelsChart"></div>
+                </div>
+                <div class="glass-card p-8 rounded-3xl">
+                    <h3 class="font-bold mb-6">Conversión por Agente</h3>
+                    <div id="conversionChart"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'https://nexaops-ai.vercel.app/api';
+        let isAdmin = false;
+
+        function switchView(viewId) {
+            document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.sidebar-link').forEach(l => {
+                l.classList.remove('active', 'font-semibold');
+                l.classList.add('text-gray-400', 'font-medium');
+            });
+            event.currentTarget.classList.add('active', 'font-semibold');
+            event.currentTarget.classList.remove('text-gray-400', 'font-medium');
+
+            if (viewId === 'general') renderCharts();
+            if (viewId === 'stats') renderStatsCharts();
+        }
+
+        async function initDashboard() {
+            const params = new URLSearchParams(window.location.search);
+            const clientId = params.get('id');
+            isAdmin = !clientId;
+
+            if (isAdmin) {
+                try {
+                    const stats = await fetch(`${API_URL}/stats`).then(r => r.json());
+                    document.getElementById('stat-1').innerText = stats.clients;
+                    document.getElementById('stat-2').innerText = stats.projects;
+                    document.getElementById('stat-3').innerText = stats.pendingTasks;
+                    document.getElementById('stat-4').innerText = `$${stats.totalIncome}`;
+                    
+                    loadTeam();
+                    loadLeads();
+                    renderCharts();
+                    setupLiveLog();
+                } catch (e) { console.error(e); }
+            } else {
+                try {
+                    const data = await fetch(`${API_URL}/client-view/${clientId}`).then(r => r.json());
+                    document.getElementById('main-title').innerText = `Hola, ${data.client.name} 👋`;
+                    document.getElementById('user-name').innerText = data.client.name;
+                    document.getElementById('user-avatar').innerText = data.client.name[0];
+                    switchView('general');
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        async function loadTeam() {
+            try {
+                const agents = await fetch(`${API_URL}/agents`).then(r => r.json());
+                const tbody = document.getElementById('team-table-body');
+                tbody.innerHTML = agents.map(a => `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="px-6 py-4 font-bold flex items-center gap-3">
+                            <div class="w-8 h-8 bg-nexa-neon/10 rounded-full flex items-center justify-center text-lg">🤖</div>
+                            ${a.name}
+                        </td>
+                        <td class="px-6 py-4 text-gray-400">${a.type || 'Agente Especializado'}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 bg-green-500/10 text-green-500 text-[10px] font-bold rounded-full">EN LÍNEA</span></td>
+                        <td class="px-6 py-4 text-right"><button onclick="window.location.href='/portal'" class="text-nexa-neon hover:underline">Chatear</button></td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadLeads() {
+            try {
+                const tasks = await fetch(`${API_URL}/tasks`).then(r => r.json());
+                const tbody = document.getElementById('leads-table-body');
+                tbody.innerHTML = tasks.slice(0, 10).map(t => `
+                    <tr class="hover:bg-white/5 border-b border-white/5">
+                        <td class="px-6 py-4 font-bold">${t.title}</td>
+                        <td class="px-6 py-4 text-gray-400">${t.description ? t.description.substring(0, 50) : ''}</td>
+                        <td class="px-6 py-4 text-xs text-gray-500">${new Date(t.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        function savePrompt() {
+            const prompt = document.getElementById('prompt-input').value;
+            alert('Prompt actualizado. Tus agentes de IA han sido re-entrenados.');
+        }
+
+        function renderCharts() {
+            const chartEl = document.querySelector("#activityChart");
+            if (!chartEl) return;
+            chartEl.innerHTML = '';
+            new ApexCharts(chartEl, {
+                series: [{ name: 'Actividad', data: [45, 52, 38, 91, 33, 109, 99] }],
+                chart: { height: 300, type: 'area', toolbar: {show:false}, foreColor: '#555', background: 'transparent' },
+                colors: ['#d4ff00'],
+                stroke: { curve: 'smooth', width: 3 },
+                fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } },
+                xaxis: { categories: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'], axisBorder:{show:false} },
+                grid: { borderColor: '#1e1e26' }
+            }).render();
+        }
+
+        function renderStatsCharts() {
+            const modelsChart = document.querySelector("#modelsChart");
+            if (modelsChart) {
+                modelsChart.innerHTML = '';
+                new ApexCharts(modelsChart, {
+                    series: [44, 55, 13],
+                    chart: { type: 'donut', height: 300, foreColor: '#fff' },
+                    labels: ['Claude 3.5', 'GPT-4o', 'Llama 3'],
+                    colors: ['#d4ff00', '#6366f1', '#a855f7'],
+                    stroke: { show: false }
+                }).render();
+            }
+
+            const conversionChart = document.querySelector("#conversionChart");
+            if (conversionChart) {
+                conversionChart.innerHTML = '';
+                new ApexCharts(conversionChart, {
+                    series: [{ name: 'Leads', data: [40, 60, 50, 70, 90] }],
+                    chart: { type: 'bar', height: 300, toolbar: {show:false}, foreColor: '#555' },
+                    colors: ['#d4ff00'],
+                    xaxis: { categories: ['Legal', 'Sales', 'Orch', 'Dev', 'PM'] }
+                }).render();
+            }
+        }
+
+        function setupLiveLog() {
+            const log = document.getElementById('activityLog');
+            if(!log) return;
+            const items = ["Agente Legal: Contrato generado", "Orchestrator: Despliegue completado", "Bot WhatsApp: Lead captado", "Agente Python: Script ejecutado"];
+            setInterval(() => {
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-white/5 border border-white/5 rounded-2xl text-[11px] mb-2 fade-in';
+                div.innerHTML = `<span class="text-nexa-neon font-bold">●</span> ${items[Math.floor(Math.random()*items.length)]}`;
+                log.prepend(div);
+                if(log.children.length > 6) log.lastElementChild.remove();
+            }, 5000);
+        }
+
+        window.onload = initDashboard;
+    </script>
+</body>
+</html>

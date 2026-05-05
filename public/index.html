@@ -25,6 +25,28 @@
         .btn-neon { background-color: #d4ff00; color: #000; transition: all 0.3s; }
         .btn-neon:hover { box-shadow: 0 0 20px rgba(212, 255, 0, 0.4); transform: translateY(-2px); }
         
+        /* Premium Background & Texture */
+        .bg-grain {
+            position: fixed; inset: 0; z-index: -2;
+            background: #000;
+        }
+        .bg-grain::after {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05; pointer-events: none;
+        }
+        .bg-glow {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 0%, rgba(212, 255, 0, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+        }
+        @keyframes pulseGlow {
+            0% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+        }
+        
         /* Animación para simular video en el Hero */
         .hero-img-pan {
             animation: panImage 20s ease-in-out infinite alternate;
@@ -99,6 +121,8 @@
     </style>
 </head>
 <body class="antialiased">
+    <div class="bg-grain"></div>
+    <div class="bg-glow"></div>
 
     <!-- Nav -->
     <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md">
@@ -113,9 +137,12 @@
                 <a href="#casos" class="hover:text-white transition">Casos</a>
                 <a href="#precios" class="hover:text-white transition">Membresías</a>
             </div>
-            <a href="#contacto" class="hidden md:inline-block px-5 py-2 bg-nexa-neon text-black text-sm font-bold rounded-full hover:scale-105 transition">
-                Empezar
-            </a>
+            <div class="hidden md:flex items-center gap-4">
+                <a href="/dashboard.html" class="text-sm font-medium text-gray-400 hover:text-nexa-neon transition">Dashboard</a>
+                <a href="#contacto" class="px-5 py-2 bg-nexa-neon text-black text-sm font-bold rounded-full hover:scale-105 transition">
+                    Empezar
+                </a>
+            </div>
             <button id="menu-btn" class="md:hidden text-white focus:outline-none">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
@@ -126,7 +153,8 @@
                 <a href="#como" class="text-gray-300 hover:text-white font-medium mobile-link">Proceso</a>
                 <a href="#soluciones" class="text-gray-300 hover:text-white font-medium mobile-link">Soluciones</a>
                 <a href="#casos" class="text-gray-300 hover:text-white font-medium mobile-link">Casos</a>
-                <a href="#precios" class="text-gray-300 hover:text-white font-medium mobile-link">Membresías</a>
+                <a href="/#precios" class="text-gray-300 hover:text-white font-medium mobile-link">Membresías</a>
+                <a href="/dashboard.html" class="text-gray-300 hover:text-white font-medium mobile-link">Dashboard</a>
                 <a href="#contacto" class="py-3 bg-nexa-neon text-black text-sm font-bold rounded-full mobile-link">Empezar</a>
             </div>
         </div>
@@ -172,7 +200,6 @@
             <div class="glass-card rounded-3xl overflow-hidden flex flex-col">
                 <div class="h-48 overflow-hidden"><img src="/assets/step_1_analisis_1777663505076.png" class="w-full h-full object-cover img-hover" alt="Analisis"></div>
                 <div class="p-8">
-                    <div class="text-nexa-neon font-mono text-sm mb-2">01</div>
                     <h3 class="text-xl font-bold mb-2">Análisis</h3>
                     <p class="text-sm text-nexa-gray">Evaluamos tus cuellos de botella actuales mediante consultoría con nuestros expertos.</p>
                 </div>
@@ -180,7 +207,6 @@
             <div class="glass-card rounded-3xl overflow-hidden flex flex-col">
                 <div class="h-48 overflow-hidden"><img src="/assets/step_2_desarrollo_1777663517295.png" class="w-full h-full object-cover img-hover" alt="Desarrollo"></div>
                 <div class="p-8">
-                    <div class="text-nexa-neon font-mono text-sm mb-2">02</div>
                     <h3 class="text-xl font-bold mb-2">Desarrollo</h3>
                     <p class="text-sm text-nexa-gray">Desarrollamos y entrenamos a tu agente con tus datos y conocimientos específicos.</p>
                 </div>
@@ -188,7 +214,6 @@
             <div class="glass-card rounded-3xl overflow-hidden flex flex-col">
                 <div class="h-48 overflow-hidden"><img src="/assets/step_3_lanzamiento_1777663536317.png" class="w-full h-full object-cover img-hover" alt="Lanzamiento"></div>
                 <div class="p-8">
-                    <div class="text-nexa-neon font-mono text-sm mb-2">03</div>
                     <h3 class="text-xl font-bold mb-2">Lanzamiento</h3>
                     <p class="text-sm text-nexa-gray">Despliegue y automatización 24/7. Notificaciones en tiempo real directo a tu smartphone.</p>
                 </div>
@@ -203,7 +228,6 @@
             <div class="glass-card rounded-3xl overflow-hidden relative">
                 <div class="h-64 overflow-hidden"><img src="/assets/why_1_atencion_1777663549732.png" class="w-full h-full object-cover opacity-80 img-hover"></div>
                 <div class="p-8 absolute bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent w-full">
-                    <div class="badge-neon mb-4">1</div>
                     <h3 class="text-xl font-bold mb-2">Atención 24/7</h3>
                     <p class="text-sm text-gray-300">Nunca pierdas un cliente. Tus agentes de IA responden dudas, cierran ventas y asisten de madrugada con tono natural y humano.</p>
                 </div>
@@ -211,7 +235,6 @@
             <div class="glass-card rounded-3xl overflow-hidden relative">
                 <div class="h-64 overflow-hidden"><img src="/assets/why_2_gestion_1777663564667.png" class="w-full h-full object-cover opacity-80 img-hover"></div>
                 <div class="p-8 absolute bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent w-full">
-                    <div class="badge-neon mb-4">2</div>
                     <h3 class="text-xl font-bold mb-2">Gestión Autónoma</h3>
                     <p class="text-sm text-gray-300">Sincroniza tus inventarios, reservas y CRM. La IA actualiza todo automáticamente sin que tengas que mover un dedo.</p>
                 </div>
@@ -219,7 +242,6 @@
             <div class="glass-card rounded-3xl overflow-hidden relative">
                 <div class="h-64 overflow-hidden"><img src="/assets/why_3_escalabilidad_1777663577856.png" class="w-full h-full object-cover opacity-80 img-hover"></div>
                 <div class="p-8 absolute bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent w-full">
-                    <div class="badge-neon mb-4">3</div>
                     <h3 class="text-xl font-bold mb-2">Escalabilidad</h3>
                     <p class="text-sm text-gray-300">Multiplica tus ventas sin aumentar tu plantilla. Nuestro sistema soporta miles de chats simultáneos y crece con tu negocio.</p>
                 </div>
@@ -228,125 +250,402 @@
     </section>
 
     <!-- Made by NexaOps -->
-    <section id="casos" class="py-24 px-6 max-w-7xl mx-auto reveal">
+    <section id="casos" class="py-24 px-6 max-w-7xl mx-auto">
         <h2 class="text-3xl md:text-5xl font-bold text-center mb-16">Hecho por NexaOps</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="aspect-square bg-nexa-card rounded-2xl overflow-hidden relative group cursor-pointer">
-                <img src="/assets/portfolio_pizzeria_1777663442189.png" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-500">
-                <div class="portfolio-overlay">
-                    <span class="text-3xl mb-2">🍕</span>
-                    <h3 class="font-bold text-xl mb-1">Pizzería</h3>
-                    <p class="text-sm text-gray-300">Chatbot de reservas y menú interactivo por WhatsApp.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Caso 1 -->
+            <a href="/casos/pizzeria.html" class="bg-nexa-card rounded-3xl overflow-hidden relative group aspect-video border border-white/10 block">
+                <img src="/assets/portfolio_pizzeria_1777663442189.png" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+                    <div class="text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Procesos AI →</div>
+                    <h3 class="font-bold text-xl">Pizzería Tech</h3>
+                    <p class="text-xs text-gray-300">Reservas y pedidos automáticos por WhatsApp.</p>
                 </div>
+            </a>
+            <!-- Caso 2 -->
+            <a href="/casos/clinica.html" class="bg-nexa-card rounded-3xl overflow-hidden relative group aspect-video border border-white/10 block">
+                <img src="/assets/portfolio_clinica_1777663454932.png" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+                    <div class="text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Procesos AI →</div>
+                    <h3 class="font-bold text-xl">Clínica IA</h3>
+                    <p class="text-xs text-gray-300">Agendamiento inteligente y triaje médico básico.</p>
+                </div>
+            </a>
+            <!-- Caso 3 -->
+            <a href="/casos/ecommerce.html" class="bg-nexa-card rounded-3xl overflow-hidden relative group aspect-video border border-white/10 block">
+                <img src="/assets/portfolio_retail_1777663477917.png" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+                    <div class="text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Procesos AI →</div>
+                    <h3 class="font-bold text-xl">E-commerce Pro</h3>
+                    <p class="text-xs text-gray-300">Soporte de ventas y recuperación de carritos.</p>
+                </div>
+            </a>
+            <!-- Caso 4 -->
+            <a href="/casos/taller.html" class="bg-nexa-card rounded-3xl overflow-hidden relative group aspect-video border border-white/10 block">
+                <img src="/assets/portfolio_taller_1777663492326.png" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+                    <div class="text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Procesos AI →</div>
+                    <h3 class="font-bold text-xl">Taller Automotriz</h3>
+                    <p class="text-xs text-gray-300">Consultas de estado de reparación 24/7.</p>
+                </div>
+            </a>
+            <!-- Caso 5 -->
+            <a href="/casos/agencia.html" class="bg-nexa-card rounded-3xl overflow-hidden relative group aspect-video border border-white/10 block">
+                <img src="/assets/portfolio_agencia_1777663597261.png" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+                    <div class="text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Procesos AI →</div>
+                    <h3 class="font-bold text-xl">Agencia B2B</h3>
+                    <p class="text-xs text-gray-300">Cualificación de leads e integración con CRM.</p>
+                </div>
+            </a>
+            <!-- Caso 6 -->
+            <a href="/casos/gym.html" class="bg-nexa-card rounded-3xl overflow-hidden relative group aspect-video border border-white/10 block">
+                <img src="/assets/portfolio_gym_1777663614039.png" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black via-black/40 to-transparent">
+                    <div class="text-nexa-neon text-[10px] font-bold uppercase tracking-widest mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Procesos AI →</div>
+                    <h3 class="font-bold text-xl">Smart Gym</h3>
+                    <p class="text-xs text-gray-300">Inscripciones y FAQs de entrenamientos.</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Impact Statistics -->
+    <section class="py-20 border-y border-white/5 bg-white/[0.02] relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
+            <div class="reveal">
+                <div class="text-4xl md:text-5xl font-black text-nexa-neon mb-2">50k+</div>
+                <div class="text-xs uppercase tracking-widest text-nexa-gray font-bold">Chats Mensuales</div>
             </div>
-            <div class="aspect-square bg-nexa-card rounded-2xl overflow-hidden relative group cursor-pointer row-span-2">
-                <img src="/assets/portfolio_clinica_1777663454932.png" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-500">
-                <div class="portfolio-overlay">
-                    <span class="text-3xl mb-2">🏥</span>
-                    <h3 class="font-bold text-xl mb-1">Clínica</h3>
-                    <p class="text-sm text-gray-300">Agendamiento de citas 24/7 y recordatorios automatizados.</p>
-                </div>
+            <div class="reveal" style="transition-delay: 100ms">
+                <div class="text-4xl md:text-5xl font-black text-white mb-2">99.9%</div>
+                <div class="text-xs uppercase tracking-widest text-nexa-gray font-bold">Disponibilidad</div>
             </div>
-            <div class="aspect-square bg-nexa-card rounded-2xl overflow-hidden relative group cursor-pointer">
-                <img src="/assets/portfolio_retail_1777663477917.png" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-500">
-                <div class="portfolio-overlay">
-                    <span class="text-3xl mb-2">🛍️</span>
-                    <h3 class="font-bold text-xl mb-1">Retail</h3>
-                    <p class="text-sm text-gray-300">Automatización de ventas y soporte al cliente en redes.</p>
-                </div>
+            <div class="reveal" style="transition-delay: 200ms">
+                <div class="text-4xl md:text-5xl font-black text-nexa-neon mb-2">120+</div>
+                <div class="text-xs uppercase tracking-widest text-nexa-gray font-bold">Bots Activos</div>
             </div>
-            <div class="aspect-square bg-nexa-card rounded-2xl overflow-hidden relative group cursor-pointer">
-                <img src="/assets/portfolio_taller_1777663492326.png" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-500">
-                <div class="portfolio-overlay">
-                    <span class="text-3xl mb-2">🚗</span>
-                    <h3 class="font-bold text-xl mb-1">Taller Automotriz</h3>
-                    <p class="text-sm text-gray-300">Consultas de estado de reparación automáticas.</p>
-                </div>
-            </div>
-            <div class="aspect-[2/1] md:col-span-2 bg-nexa-card rounded-2xl overflow-hidden relative group cursor-pointer">
-                <img src="/assets/portfolio_agencia_1777663597261.png" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-500">
-                <div class="portfolio-overlay">
-                    <span class="text-3xl mb-2">💼</span>
-                    <h3 class="font-bold text-xl mb-1">Agencia B2B</h3>
-                    <p class="text-sm text-gray-300">Cualificación de leads empresariales e integración con CRM.</p>
-                </div>
-            </div>
-            <div class="aspect-square bg-nexa-card rounded-2xl overflow-hidden relative group cursor-pointer">
-                <img src="/assets/portfolio_gym_1777663614039.png" class="w-full h-full object-cover opacity-70 group-hover:scale-110 transition duration-500">
-                <div class="portfolio-overlay">
-                    <span class="text-3xl mb-2">🏋️</span>
-                    <h3 class="font-bold text-xl mb-1">Gimnasio</h3>
-                    <p class="text-sm text-gray-300">Inscripciones automatizadas y FAQs de horarios.</p>
-                </div>
+            <div class="reveal" style="transition-delay: 300ms">
+                <div class="text-4xl md:text-5xl font-black text-white mb-2">15m+</div>
+                <div class="text-xs uppercase tracking-widest text-nexa-gray font-bold">Ventas Generadas</div>
             </div>
         </div>
     </section>
 
-    <!-- Memberships -->
-    <section id="precios" class="py-24 px-6 max-w-7xl mx-auto reveal">
+    <!-- Pricing Section -->
+    <section id="precios" class="py-24 px-6 max-w-7xl mx-auto">
         <h2 class="text-3xl md:text-5xl font-bold text-center mb-16">Membresías</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
             
-            <!-- Free -->
-            <div class="glass-card glow-border p-10 rounded-3xl flex flex-col opacity-80">
-                <div class="badge-neon mb-4 bg-gray-500">F</div>
-                <h3 class="text-2xl font-bold">Free Audit</h3>
-                <p class="text-sm text-nexa-gray mb-6">Prueba el poder de la IA</p>
-                <div class="text-4xl font-bold mb-8">$0<span class="text-sm text-nexa-gray font-normal">/mes</span></div>
-                
-                <div class="mb-8 flex-1">
-                    <p class="font-bold mb-4">Qué incluye:</p>
-                    <ul class="space-y-3 text-sm text-nexa-gray">
-                        <li class="flex items-center gap-2"><span class="text-gray-500">✓</span> Auditoría de procesos</li>
-                        <li class="flex items-center gap-2"><span class="text-gray-500">✓</span> Mapa de ruta IA</li>
-                        <li class="flex items-center gap-2"><span class="text-gray-500">✓</span> Demo Chatbot genérico</li>
-                    </ul>
-                </div>
-                <button class="w-full py-3 border border-gray-600 font-bold rounded-full hover:bg-white/10 transition">Agendar Auditoría</button>
+            <!-- Plan 1: Free -->
+            <div class="glass-card p-8 rounded-3xl border border-white/5 flex flex-col opacity-80">
+                <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center font-bold mb-4">F</div>
+                <h3 class="text-xl font-bold mb-1">Free Audit</h3>
+                <p class="text-xs text-nexa-gray mb-6">Prueba el poder de la IA</p>
+                <div class="text-3xl font-bold mb-8">$0<span class="text-sm font-normal text-nexa-gray">/mes</span></div>
+                <ul class="space-y-3 text-xs text-nexa-gray mb-10 flex-1">
+                    <li class="flex items-center gap-2">✓ Auditoría de procesos</li>
+                    <li class="flex items-center gap-2">✓ Mapa de ruta IA</li>
+                    <li class="flex items-center gap-2">✓ Demo Chatbot genérico</li>
+                </ul>
+                <button class="w-full py-3 rounded-full border border-gray-600 text-sm font-bold hover:bg-white/5 transition">Agendar</button>
             </div>
 
-            <!-- Standard -->
-            <div class="glass-card glow-border p-10 rounded-3xl flex flex-col">
-                <div class="badge-neon mb-4">S</div>
-                <h3 class="text-2xl font-bold">Standard</h3>
-                <p class="text-sm text-nexa-gray mb-6">Para negocios en crecimiento</p>
-                <div class="text-4xl font-bold mb-8">$200<span class="text-sm text-nexa-gray font-normal">/mes</span></div>
-                
-                <div class="mb-8 flex-1">
-                    <p class="font-bold mb-4">Qué incluye:</p>
-                    <ul class="space-y-3 text-sm text-nexa-gray">
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Bot WhatsApp Básico</li>
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Respuestas a FAQs</li>
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Setup fee $500 (Único)</li>
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Soporte por email</li>
-                    </ul>
-                </div>
-                <button class="w-full py-3 border border-nexa-neon text-nexa-neon font-bold rounded-full hover:bg-nexa-neon/10 transition">Empezar</button>
+            <!-- Plan 2: Starter -->
+            <div class="glass-card p-8 rounded-3xl border border-nexa-neon/30 flex flex-col relative scale-105 z-10 shadow-2xl shadow-nexa-neon/10">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-nexa-neon text-black text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest">Más Popular</div>
+                <div class="w-10 h-10 rounded-lg bg-nexa-neon/20 flex items-center justify-center font-bold text-nexa-neon mb-4">S</div>
+                <h3 class="text-xl font-bold mb-1">Starter Kit</h3>
+                <p class="text-xs text-nexa-gray mb-6">Ideal para pequeñas empresas</p>
+                <div class="text-3xl font-bold mb-8">$29<span class="text-sm font-normal text-nexa-gray">/mes</span></div>
+                <ul class="space-y-3 text-xs text-nexa-gray mb-10 flex-1">
+                    <li class="flex items-center gap-2">✓ Agente IA (WhatsApp API)</li>
+                    <li class="flex items-center gap-2">✓ Entrenamiento con tus datos</li>
+                    <li class="flex items-center gap-2">✓ Soporte vía Chat</li>
+                </ul>
+                <button onclick="iniciarCheckout('starter')" class="w-full py-3 btn-neon font-bold rounded-full">Suscribirme</button>
             </div>
-            
-            <!-- Pro -->
-            <div class="glass-card glow-border p-10 rounded-3xl border-nexa-neon/50 relative overflow-hidden flex flex-col bg-[#111600]">
-                <div class="absolute top-0 right-0 p-4">
-                    <span class="bg-nexa-neon text-black text-xs font-bold px-3 py-1 rounded-full">Popular</span>
+
+            <!-- Plan 3: Growth (Featured) -->
+            <div class="glass-card p-8 rounded-3xl border border-nexa-neon/50 bg-nexa-neon/5 flex flex-col relative">
+                <span class="absolute top-4 right-4 bg-nexa-neon text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Popular</span>
+                <div class="w-10 h-10 rounded-lg bg-white text-black flex items-center justify-center font-bold mb-4">G</div>
+                <h3 class="text-xl font-bold mb-1">Growth</h3>
+                <p class="text-xs text-nexa-gray mb-6">Lead Capture & CRM</p>
+                <div class="text-3xl font-bold mb-8">$49<span class="text-sm font-normal text-nexa-gray">/mes</span></div>
+                <ul class="space-y-3 text-xs text-nexa-gray mb-10 flex-1">
+                    <li class="flex items-center gap-2">✓ Todo el Plan Starter</li>
+                    <li class="flex items-center gap-2">✓ Integración con CRM</li>
+                    <li class="flex items-center gap-2">✓ Dashboard Administrativo</li>
+                </ul>
+                <button onclick="iniciarCheckout('growth')" class="w-full py-3 rounded-full bg-nexa-neon text-black text-sm font-bold hover:shadow-[0_0_20px_rgba(212,255,0,0.3)] transition">Suscribirse</button>
+            </div>
+
+            <!-- Plan 4: Enterprise -->
+            <div class="glass-card p-8 rounded-3xl border border-indigo-500/30 flex flex-col">
+                <div class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold mb-4">E</div>
+                <h3 class="text-xl font-bold mb-1">Enterprise AI</h3>
+                <p class="text-xs text-nexa-gray mb-6">Ecosistema a medida</p>
+                <div class="text-3xl font-bold mb-8">$99<span class="text-sm font-normal text-nexa-gray">/mes</span></div>
+                <ul class="space-y-3 text-xs text-nexa-gray mb-10 flex-1">
+                    <li class="flex items-center gap-2">✓ Multi-Agentes (MCP)</li>
+                    <li class="flex items-center gap-2">✓ Workflows Personalizados</li>
+                    <li class="flex items-center gap-2">✓ Soporte Prioritario 1:1</li>
+                </ul>
+                <button onclick="iniciarCheckout('enterprise')" class="w-full py-3 rounded-full border border-white/20 text-sm font-bold hover:bg-white/5 transition">Contactar</button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-24 px-6 max-w-7xl mx-auto overflow-hidden">
+        <h2 class="text-3xl md:text-5xl font-bold text-center mb-16">Lo que dicen nuestros socios</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass-card p-8 rounded-3xl reveal border-l-4 border-l-nexa-neon">
+                <div class="flex gap-1 mb-4 text-nexa-neon">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                 </div>
-                <div class="badge-neon mb-4 bg-white text-black">P</div>
-                <h3 class="text-2xl font-bold">Pro</h3>
-                <p class="text-sm text-nexa-gray mb-6">Automatización total e Integración</p>
-                <div class="text-4xl font-bold mb-8">$500+<span class="text-sm text-nexa-gray font-normal">/mes</span></div>
-                
-                <div class="mb-8 flex-1">
-                    <p class="font-bold mb-4">Qué incluye:</p>
-                    <ul class="space-y-3 text-sm text-nexa-gray">
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Agente IA Avanzado Custom</li>
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Integración CRM / Pagos</li>
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Flujos personalizados</li>
-                        <li class="flex items-center gap-2"><span class="text-nexa-neon">✓</span> Soporte prioritario 24/7</li>
-                    </ul>
+                <p class="text-gray-300 italic mb-6">"Implementar el bot de WhatsApp de NexaOps redujo nuestra carga de soporte en un 70%. Ahora cerramos ventas incluso mientras dormimos."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-nexa-neon/20 flex items-center justify-center font-bold text-nexa-neon">RC</div>
+                    <div>
+                        <div class="font-bold text-sm">Ricardo Castalleda</div>
+                        <div class="text-xs text-nexa-gray">CEO, Pizzería Tech</div>
+                    </div>
                 </div>
-                <button class="w-full py-3 btn-neon font-bold rounded-full">Empezar</button>
+            </div>
+            <div class="glass-card p-8 rounded-3xl reveal border-l-4 border-l-white/20" style="transition-delay: 100ms">
+                <div class="flex gap-1 mb-4 text-nexa-neon">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+                <p class="text-gray-300 italic mb-6">"La integración con nuestro CRM fue impecable. La IA califica a los leads y solo nos pasa los que realmente están listos para comprar."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-white">MA</div>
+                    <div>
+                        <div class="font-bold text-sm">María Arreaza</div>
+                        <div class="text-xs text-nexa-gray">Directora, Clínica IA</div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card p-8 rounded-3xl reveal border-l-4 border-l-nexa-neon" style="transition-delay: 200ms">
+                <div class="flex gap-1 mb-4 text-nexa-neon">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                </div>
+                <p class="text-gray-300 italic mb-6">"El sistema de Pago Móvil automático es una maravilla. Nuestros clientes en Venezuela pagan y reciben su acceso al instante."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-nexa-neon/20 flex items-center justify-center font-bold text-nexa-neon">JP</div>
+                    <div>
+                        <div class="font-bold text-sm">Juan Pablo</div>
+                        <div class="text-xs text-nexa-gray">Fundador, Smart Gym</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
+
+    <!-- Modal para datos del checkout -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[100] backdrop-blur-sm p-4">
+        <div class="glass-card p-6 md:p-8 rounded-3xl w-full max-w-[500px] relative border border-[#d4ff00]/30 flex flex-col max-h-[90vh]">
+            <button onclick="document.getElementById('checkoutModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white z-10 p-2">✕</button>
+            
+            <div class="overflow-y-auto pr-2 custom-scrollbar">
+                <h3 class="text-2xl font-bold mb-2">Completar Suscripción</h3>
+                <p class="text-nexa-gray text-sm mb-6">Por favor ingresa tus datos para crear tu cuenta y procesar tu suscripción de forma segura.</p>
+                
+                <form id="checkoutForm" onsubmit="procesarPago(event)" class="space-y-5">
+                    <input type="hidden" id="selectedPlan" name="planId">
+                    <input type="hidden" id="paymentMethod" value="stripe">
+                    
+                    <!-- Datos Personales -->
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-[10px] uppercase text-nexa-gray font-bold mb-1 ml-1">Nombre Completo</label>
+                                <input type="text" id="checkoutName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-nexa-neon text-white text-sm transition-all" placeholder="Ej: Juan Pérez">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase text-nexa-gray font-bold mb-1 ml-1">WhatsApp</label>
+                                <input type="tel" id="checkoutPhone" required placeholder="+58412..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-nexa-neon text-white text-sm transition-all">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-[10px] uppercase text-nexa-gray font-bold mb-1 ml-1">Correo Electrónico</label>
+                            <input type="email" id="checkoutEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-nexa-neon text-white text-sm transition-all" placeholder="tu@email.com">
+                        </div>
+                    </div>
+
+                    <!-- Método de Pago -->
+                    <div class="pt-2">
+                        <label class="block text-[10px] uppercase text-nexa-gray font-bold mb-3 ml-1">Método de Pago</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="setPaymentMethod('stripe')" id="method-stripe" class="py-3 rounded-xl border border-nexa-neon bg-nexa-neon/10 text-xs font-bold transition-all flex flex-col items-center gap-1 group">
+                                <span class="group-hover:scale-110 transition">💳 Tarjeta / Int.</span>
+                                <span class="text-[9px] opacity-60 font-normal">Stripe Secure</span>
+                            </button>
+                            <button type="button" onclick="setPaymentMethod('manual')" id="method-manual" class="py-3 rounded-xl border border-white/10 bg-white/5 text-xs font-bold transition-all flex flex-col items-center gap-1 group">
+                                <span class="group-hover:scale-110 transition">🇻🇪 Pago Móvil</span>
+                                <span class="text-[9px] opacity-60 font-normal">Bolívares (VES)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bloque Dinámico: Pago Móvil -->
+                    <div id="pagoMovilDetails" class="hidden animate-fade-in">
+                        <div class="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4">
+                            <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                                <span class="text-[10px] text-nexa-neon font-bold uppercase tracking-wider">Datos de Transferencia</span>
+                                <span id="tasaStatus" class="text-[8px] uppercase text-gray-400 bg-white/5 px-2 py-0.5 rounded-full">Cargando...</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 gap-2 text-xs">
+                                <div class="flex justify-between"><span class="text-gray-400">Banco:</span> <span class="text-white font-medium">Venezuela (0102)</span></div>
+                                <div class="flex justify-between"><span class="text-gray-400">Teléfono:</span> <span class="text-white font-medium">0414-7042283</span></div>
+                                <div class="flex justify-between"><span class="text-gray-400">Cédula/RIF:</span> <span class="text-white font-medium">V-23531330</span></div>
+                            </div>
+
+                            <div class="pt-3 border-t border-white/10">
+                                <div class="flex justify-between items-end">
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] text-nexa-neon font-bold uppercase mb-1">Monto Total VES</span>
+                                        <span id="montoVES" class="text-white font-black text-xl leading-none">Calculando...</span>
+                                    </div>
+                                    <span id="usdAmountLabel" class="text-[10px] text-gray-400 font-medium pb-0.5"></span>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <label class="block text-[10px] uppercase text-nexa-gray font-bold mb-1.5 ml-1">Número de Referencia</label>
+                                <input type="text" id="manualRef" placeholder="8-10 últimos dígitos" class="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:border-nexa-neon text-white text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="checkoutBtn" class="w-full py-4 btn-neon font-bold rounded-xl flex justify-center items-center gap-2 shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
+                        Continuar
+                    </button>
+                    
+                    <p class="text-[10px] text-center text-nexa-gray">Al continuar, aceptas nuestros términos de servicio y políticas de privacidad.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cachedBCVRate = null;
+        const FALLBACK_RATE = 489.55;
+
+        async function fetchBCVRate() {
+            if (cachedBCVRate) return cachedBCVRate;
+            try {
+                const response = await fetch('/api/rate/bcv');
+                const data = await response.json();
+                if (data && data.rate) {
+                    cachedBCVRate = data.rate;
+                    const sourceText = data.source === 'official_bcv' ? 'Oficial BCV' : 'Referencial';
+                    document.getElementById('tasaStatus').innerText = `${sourceText}: ${cachedBCVRate} VES`;
+                    return cachedBCVRate;
+                }
+            } catch (e) {
+                console.error('Error fetching BCV rate:', e);
+                showToast('Error cargando tasa. Usando tasa de respaldo.');
+            }
+            cachedBCVRate = FALLBACK_RATE;
+            document.getElementById('tasaStatus').innerText = `Referencial: ${FALLBACK_RATE} VES`;
+            return FALLBACK_RATE;
+        }
+
+        function setPaymentMethod(method) {
+            document.getElementById('paymentMethod').value = method;
+            const btnStripe = document.getElementById('method-stripe');
+            const btnManual = document.getElementById('method-manual');
+            const details = document.getElementById('pagoMovilDetails');
+            const btnText = document.getElementById('checkoutBtn');
+
+            if (method === 'stripe') {
+                btnStripe.classList.replace('border-white/10', 'border-nexa-neon');
+                btnStripe.classList.replace('bg-white/5', 'bg-nexa-neon/10');
+                btnManual.classList.replace('border-nexa-neon', 'border-white/10');
+                btnManual.classList.replace('bg-nexa-neon/10', 'bg-white/5');
+                details.classList.add('hidden');
+                btnText.innerHTML = 'Ir al Pago Seguro (Stripe)';
+                document.getElementById('manualRef').required = false;
+            } else {
+                btnManual.classList.replace('border-white/10', 'border-nexa-neon');
+                btnManual.classList.replace('bg-white/5', 'bg-nexa-neon/10');
+                btnStripe.classList.replace('border-nexa-neon', 'border-white/10');
+                btnStripe.classList.replace('bg-nexa-neon/10', 'bg-white/5');
+                details.classList.remove('hidden');
+                btnText.innerHTML = 'Confirmar Registro';
+                document.getElementById('manualRef').required = true;
+                calcularTasa();
+            }
+        }
+
+        async function calcularTasa() {
+            const planId = document.getElementById('selectedPlan').value;
+            const precios = { starter: 29, growth: 49, enterprise: 99 };
+            const usd = precios[planId] || 29;
+            const elVES = document.getElementById('montoVES');
+            const elUSD = document.getElementById('usdAmountLabel');
+            
+            const tasa = await fetchBCVRate();
+            const totalVES = (usd * tasa).toLocaleString('es-VE', { minimumFractionDigits: 2 });
+            elVES.innerText = `${totalVES} VES`;
+            elUSD.innerText = `($${usd} USD)`;
+        }
+
+        function iniciarCheckout(planId) {
+            document.getElementById('selectedPlan').value = planId;
+            const modal = document.getElementById('checkoutModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setPaymentMethod('stripe');
+        }
+
+        async function procesarPago(e) {
+            e.preventDefault();
+            const btn = document.getElementById('checkoutBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-spin">↻</span> Procesando...';
+            btn.disabled = true;
+
+            const method = document.getElementById('paymentMethod').value;
+            const payload = {
+                planId: document.getElementById('selectedPlan').value,
+                name: document.getElementById('checkoutName').value,
+                email: document.getElementById('checkoutEmail').value,
+                phone: document.getElementById('checkoutPhone').value,
+                reference: document.getElementById('manualRef').value
+            };
+
+            try {
+                const endpoint = method === 'stripe' ? '/api/checkout' : '/api/checkout/manual';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                
+                if (method === 'stripe') {
+                    if (data.url) window.location.href = data.url;
+                    else throw new Error(data.error || 'Error en Stripe');
+                } else {
+                    if (data.success) {
+                        alert('¡Registro exitoso! Estamos verificando tu pago.');
+                        window.location.href = '/success.html?method=manual';
+                    } else throw new Error(data.error || 'Error en registro');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
 
     <!-- FAQ -->
     <section id="faq" class="py-24 px-6 max-w-3xl mx-auto">
@@ -433,7 +732,7 @@
     </footer>
 
     <!-- Floating WhatsApp Bot Button -->
-    <a href="https://wa.me/1234567890?text=Hola,%20quiero%20probar%20el%20bot%20de%20NexaOps%20AI" target="_blank" class="fixed bottom-6 left-6 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition z-50 flex items-center justify-center" title="Probar AI Bot">
+    <a href="https://wa.me/584121146391?text=Hola,%20quisiera%20saber%20m%C3%A1s%20sobre%20NexaOps%20AI" target="_blank" class="fixed bottom-6 left-6 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition z-50 flex items-center justify-center" title="Probar AI Bot">
         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.347-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.876 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
     </a>
 
@@ -487,8 +786,8 @@
                 };
 
                 try {
-                    // Endpoint del backend real
-                    const response = await fetch('http://localhost:3001/api/leads', {
+                    // Endpoint del backend relativo para producción
+                    const response = await fetch('/api/leads', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)

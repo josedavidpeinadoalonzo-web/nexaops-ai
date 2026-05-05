@@ -21,8 +21,21 @@
       "dest": "/api/server.js"
     },
     {
+      "src": "/login",
+      "dest": "/public/login.html"
+    },
+    {
       "src": "/admin/(.*)",
+      "headers": { "X-Robots-Tag": "noindex" },
       "dest": "/admin/$1"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/admin/dashboard.html"
+    },
+    {
+      "src": "/portal",
+      "dest": "/admin/portal.html"
     },
     {
       "src": "/(.*)",
