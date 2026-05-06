@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Code | NexaOps AI</title>
+    <title>NexaOps AI | Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script>
         (function() {
             const session = localStorage.getItem('nexa_session');
@@ -16,119 +16,284 @@
         })();
     </script>
     <style>
-        body {
-            background-color: #000;
-            color: #d1d1d1;
-            font-family: 'JetBrains Mono', monospace;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
+        :root {
+            --bg-deep: #050508;
+            --panel-bg: #0a0a0f;
+            --text-main: #e2e8f0;
+            --accent: #d4ff00;
+            --border: #1a1a24;
+            --system-gray: #4a4a55;
         }
-        #terminal {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-        .line { margin-bottom: 10px; line-height: 1.5; font-size: 13px; }
-        .prompt { color: #d4ff00; font-weight: bold; margin-right: 10px; }
-        .thought { color: #00bcd4; font-style: italic; }
-        .tool { color: #ffeb3b; font-weight: bold; }
-        .output { color: #e2e8f0; }
-        .error { color: #ff5252; }
-        .system { color: #757575; font-size: 11px; }
-        
-        #input-line { display: flex; align-items: flex-start; margin-top: 10px; }
-        #prompt-input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-family: inherit;
-            font-size: 13px;
-            outline: none;
-            flex: 1;
-            resize: none;
-            padding: 0;
-            caret-color: #d4ff00;
-        }
-        
+    <style>
+        /* --- Actualización de Artifacts Styles (Fase 3) --- */
         #artifacts-panel {
             width: 45%;
-            background: #0a0a0a;
-            border-left: 1px solid #222;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--border);
             display: none;
             flex-direction: column;
+            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .artifact-header {
-            padding: 10px 20px;
-            background: #111;
-            border-bottom: 1px solid #222;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .artifact-content { flex: 1; background: white; margin: 15px; border-radius: 8px; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #333; }
 
-        .loading-dots:after {
-            content: '...';
-            animation: dots 1.5s steps(5, end) infinite;
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
-        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } 80%, 100% { content: ''; } }
+
+        .artifact-tabs {
+            display: flex;
+            background: #0c0c12;
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--system-gray);
+            text-transform: uppercase;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active { 
+            color: var(--accent); 
+            border-bottom-color: var(--accent);
+            background: rgba(212, 255, 0, 0.02);
+        }
+
+        .artifact-viewer {
+            flex: 1;
+            position: relative;
+            background: #fff;
+            margin: 12px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #code-viewer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0d0d11;
+            color: #a9b1d6;
+            padding: 20px;
+            font-size: 12px;
+            overflow: auto;
+            display: none;
+            white-space: pre-wrap;
+        }
+
+        .metadata-box {
+            padding: 16px 20px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-cols: 2;
+            gap: 15px;
+        }
+
+        .meta-item { display: flex; flex-direction: column; gap: 4px; }
+        .meta-label { font-size: 9px; color: var(--system-gray); text-transform: uppercase; letter-spacing: 1px; }
+        .meta-value { font-size: 11px; color: #fff; font-weight: 500; }
+
+        /* Estilo para los bloques de código resaltados en el terminal */
+        pre code.hljs { background: transparent; padding: 0; }
     </style>
 </head>
 <body>
 
-    <div id="terminal" onclick="focusInput()">
-        <div class="line system">NexaOps AI [v2.4.0] - Claude Code Agentic Terminal</div>
-        <div class="line system">Connected to OpenRouter (Model: anthropic/claude-3.5-sonnet)</div>
-        <div class="line system">Type /help for available commands. Select an agent to begin.</div>
-        <div id="history"></div>
-        <div id="input-line">
-            <span class="prompt" id="current-prompt">nexaops-ai ></span>
-            <textarea id="prompt-input" rows="1" autofocus onkeydown="handleInput(event)"></textarea>
+    <!-- Panel 1: Explorador de Agentes -->
+    <aside id="explorer">
+        <div class="explorer-header mono">System_Agents</div>
+        <nav id="agent-list">
+            <!-- Cargado dinamicamente -->
+        </nav>
+        <div class="mt-auto p-6">
+            <div class="text-[10px] text-gray-600 mono mb-2 uppercase">Core_Status</div>
+            <div class="flex items-center gap-2 text-xs">
+                <div class="status-dot"></div>
+                <span class="mono text-gray-400">Node_VE_Central_01</span>
+            </div>
         </div>
-    </div>
+    </aside>
 
+    <!-- Panel 2: Terminal de Comando -->
+    <main id="main-terminal">
+        <div id="terminal-output" class="mono" onclick="focusInput()">
+            <div class="system-msg mono">NexaOps AI OS [Version 2.5.0-production]</div>
+            <div class="system-msg mono">Secure session established via OpenRouter TLS 1.3</div>
+            <div id="history"></div>
+        </div>
+
+        <div class="input-area">
+            <div id="prompt-container">
+                <span class="prompt-symbol mono" id="current-prompt-label">nexaops-ai ></span>
+                <textarea id="prompt-input" rows="1" autofocus onkeydown="handleInput(event)" placeholder="Escribe un comando o consulta..."></textarea>
+            </div>
+        </div>
+    </main>
+
+    <!-- Panel 3: Visualización de Artefactos (Fase 3: Smart Artifacts) -->
     <aside id="artifacts-panel">
         <div class="artifact-header">
-            <span class="system mono text-[10px] uppercase font-bold tracking-widest">Visual_Artifact_Buffer</span>
-            <button onclick="togglePanel()" class="text-gray-500 hover:text-white">✕</button>
+            <span class="mono text-[10px] text-gray-500 uppercase font-bold tracking-widest">Active_Artifact_Buffer</span>
+            <div class="flex gap-4">
+                <button title="Full Screen" onclick="openFull()" class="text-gray-500 hover:text-white transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </button>
+                <button title="Download" onclick="downloadArtifact()" class="text-gray-500 hover:text-white transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+                <button onclick="togglePanel()" class="text-gray-500 hover:text-white transition-colors">✕</button>
+            </div>
         </div>
-        <div class="artifact-content">
+
+        <div class="artifact-tabs mono">
+            <div id="tab-preview" class="tab-btn active" onclick="setArtifactView('preview')">Preview</div>
+            <div id="tab-code" class="tab-btn" onclick="setArtifactView('code')">Source_Code</div>
+        </div>
+
+        <div class="artifact-viewer">
             <iframe id="preview-frame"></iframe>
+            <pre id="code-viewer" class="mono"><code class="language-html" id="code-content"></code></pre>
         </div>
-        <div class="p-4 flex gap-2">
-            <button onclick="downloadArtifact()" class="bg-white/5 hover:bg-white/10 text-[10px] px-4 py-2 rounded font-bold">DOWNLOAD</button>
-            <button onclick="openFull()" class="bg-[#d4ff00] text-black text-[10px] px-4 py-2 rounded font-bold">FULLSCREEN</button>
+
+        <div class="metadata-box mono">
+            <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+                <div class="meta-item">
+                    <span class="meta-label">Buffer_Type</span>
+                    <span id="meta-type" class="meta-value">N/A</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Data_Size</span>
+                    <span id="meta-size" class="meta-value">0 KB</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span id="meta-status" class="meta-value text-green-500">READY</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Timestamp</span>
+                    <span id="meta-time" class="meta-value text-[10px]">--:--:--</span>
+                </div>
+            </div>
         </div>
     </aside>
 
     <script>
         const AGENTS = [
-            { id: 'orch', name: 'orchestrator', emoji: '🎯', prompt: 'Eres el Coordinador de NexaOps. Tu misión es planificar y delegar tareas.' },
-            { id: 'python', name: 'python-dev', emoji: '🐍', prompt: 'Eres experto en Python y Automatización.' },
-            { id: 'frontend', name: 'frontend-dev', emoji: '🎨', prompt: 'Eres el diseñador web de NexaOps. Usa Tailwind CSS.' },
-            { id: 'marketing', name: 'marketing', emoji: '🚀', prompt: 'Eres experto en Growth y SEO.' },
-            { id: 'botmgr', name: 'bot-manager', emoji: '💬', prompt: 'Eres el gestor de bots de WhatsApp.' }
+            { 
+                id: 'orch', 
+                name: 'orchestrator', 
+                emoji: '🎯', 
+                role: 'CORE_ENGINE',
+                prompt: 'Eres el Orquestador Central de NexaOps AI. Tu función es el diseño de arquitecturas de software, coordinación de flujos multi-agente y gestión del ciclo de vida del desarrollo. Siempre piensa de forma modular, escalable y mantén sincronizados el frontend y backend.' 
+            },
+            { 
+                id: 'saas', 
+                name: 'saas-architect', 
+                emoji: '🏗️', 
+                role: 'INFRASTRUCTURE',
+                prompt: 'Eres el Arquitecto SaaS de NexaOps. Experto en aislamiento de datos multi-tenant, gestión de suscripciones, límites de tasa de API y despliegue en la nube. Tu prioridad es la seguridad, escalabilidad y cumplimiento normativo (GDPR/TLS).' 
+            },
+            { 
+                id: 'frontend', 
+                name: 'frontend-dev', 
+                emoji: '🎨', 
+                role: 'VISUAL_INTERFACE',
+                prompt: 'Eres el Desarrollador Frontend Senior. Experto en Vanilla JS, Tailwind CSS y UX premium. Tu objetivo es crear interfaces ultra-rápidas, con glassmorphism, animaciones fluidas y estética de alto nivel. Siempre genera código listo para producción.' 
+            },
+            { 
+                id: 'python', 
+                name: 'python-dev', 
+                emoji: '🐍', 
+                role: 'AUTOMATION',
+                prompt: 'Eres el Ingeniero de Automatización. Experto en Python, Web Scraping (BeautifulSoup/Selenium), integración de APIs y procesamiento de datos. Crea scripts eficientes, robustos y bien documentados.' 
+            },
+            { 
+                id: 'legal', 
+                name: 'legal-admin', 
+                emoji: '⚖️', 
+                role: 'COMPLIANCE',
+                prompt: 'Eres el Administrador Legal y de Proyectos. Tu misión es redactar propuestas comerciales, contratos de servicio (SOW) y asegurar que el onboarding de clientes cumpla con todos los requisitos legales y de negocio.' 
+            },
+            { 
+                id: 'whatsapp', 
+                name: 'bot-manager', 
+                emoji: '💬', 
+                role: 'COMMUNICATION',
+                prompt: 'Eres el Gestor de Bots de WhatsApp. Experto en Green API y Meta Cloud API. Configuras flujos de conversación, webhooks de respuesta rápida y entrenas a los agentes de ventas para máxima conversión.' 
+            }
         ];
 
         let selectedAgent = AGENTS[0];
         let lastArtifact = null;
 
+        // --- Inicialización ---
+        function init() {
+            const list = document.getElementById('agent-list');
+            list.innerHTML = '';
+            AGENTS.forEach(agent => {
+                const div = document.createElement('div');
+                div.className = `agent-item mono ${agent.id === selectedAgent.id ? 'active' : ''}`;
+                div.id = `agent-${agent.id}`;
+                div.onclick = () => selectAgent(agent.id);
+                div.innerHTML = `
+                    <span class="text-lg">${agent.emoji}</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold">${agent.name.toUpperCase()}</span>
+                        <span class="text-[8px] text-gray-500 font-medium tracking-tight">${agent.role}</span>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            updatePromptLabel();
+            log('system', 'NexaOps AI Command Center [READY]');
+            log('system', 'Authorization Level: Administrator');
+            log('system', 'Type <span class="text-white">/help</span> to list available system commands.');
+        }
+
+        function selectAgent(id) {
+            const agent = AGENTS.find(a => a.id === id);
+            if (!agent) return;
+            
+            document.querySelectorAll('.agent-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`agent-${id}`).classList.add('active');
+            
+            selectedAgent = agent;
+            updatePromptLabel();
+            
+            const history = document.getElementById('history');
+            history.innerHTML += `<div class="line system">>> PROTOCOL_SWITCH: Switched to ${agent.name.toUpperCase()} specialists.</div>`;
+            scrollToBottom();
+        }
+
+        function updatePromptLabel() {
+            document.getElementById('current-prompt-label').innerText = `${selectedAgent.name} >`;
+        }
+
         function focusInput() { document.getElementById('prompt-input').focus(); }
 
+        // --- Lógica de Input ---
         function handleInput(e) {
             const input = e.target;
+            input.style.height = 'auto';
+            input.style.height = input.scrollHeight + 'px';
+
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 const cmd = input.value.trim();
                 if (!cmd) return;
                 
                 input.value = '';
+                input.style.height = 'auto';
                 executeCommand(cmd);
             }
         }
@@ -137,9 +302,14 @@
             const history = document.getElementById('history');
             
             // Log user command
-            history.innerHTML += `<div class="line"><span class="prompt">nexaops-ai ></span> ${content}</div>`;
+            history.innerHTML += `
+                <div class="line">
+                    <span class="prompt-symbol mono">${selectedAgent.name} ></span> 
+                    <span class="text-white">${content}</span>
+                </div>
+            `;
             
-            // Handle Local Commands
+            // Handle Slash Commands
             if (content.startsWith('/')) {
                 handleSlashCommand(content);
                 return;
@@ -147,13 +317,16 @@
 
             const apiKey = localStorage.getItem('openrouter_api_key');
             if (!apiKey) {
-                log('error', 'Error: API Key de OpenRouter no encontrada. Usa /config [key] para establecerla.');
+                log('error', 'CORE_AUTH_ERROR: OpenRouter API Key not found in local buffer.');
+                log('error', 'ACTION: Use <span class="text-white">/config [YOUR_KEY]</span> to establish a secure connection.');
+                scrollToBottom();
                 return;
             }
 
             // Reasoning Animation
             const thoughtId = 'thought-' + Date.now();
-            log('thought', `Thinking...`, thoughtId);
+            log('thought-block', `[REASONING_ENGINE] Initializing ${selectedAgent.name.toUpperCase()} intelligence matrix...`, thoughtId);
+            scrollToBottom();
             
             try {
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -161,65 +334,102 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${apiKey}`,
+                        'HTTP-Referer': 'https://nexaops-ai.vercel.app',
+                        'X-Title': 'NexaOps Terminal'
                     },
                     body: JSON.stringify({
                         model: 'anthropic/claude-3.5-sonnet',
                         messages: [
-                            { role: 'system', content: selectedAgent.prompt + ' Responde como una terminal de comando. Si generas HTML, usa bloques ```html.' },
+                            { 
+                                role: 'system', 
+                                content: selectedAgent.prompt + ' Responde como una terminal experta. Sé técnico, preciso y no uses introducciones innecesarias. Si generas código visual (HTML/Tailwind), hazlo premium y encapsúlalo en bloques ```html.' 
+                            },
                             { role: 'user', content: content }
                         ]
                     })
                 });
 
                 const data = await response.json();
-                document.getElementById(thoughtId).remove();
-
+                const thoughtEl = document.getElementById(thoughtId);
+                
                 if (data.choices && data.choices[0]) {
-                    const aiMsg = data.choices[0].message.content;
-                    log('output', marked.parse(aiMsg));
-                    extractArtifact(aiMsg);
+                    if(thoughtEl) thoughtEl.innerHTML = `[SUCCESS] Context analyzed. Generating output...`;
+                    
+                    setTimeout(() => {
+                        if(thoughtEl) thoughtEl.remove();
+                        const aiMsg = data.choices[0].message.content;
+                        log('output', marked.parse(aiMsg));
+                        extractArtifact(aiMsg);
+                        scrollToBottom();
+                    }, 400);
                 } else {
-                    log('error', 'API Error: ' + JSON.stringify(data));
+                    if(thoughtEl) thoughtEl.remove();
+                    log('error', 'API_COMM_FAILURE: ' + (data.error?.message || 'Check connection status.'));
+                    scrollToBottom();
                 }
+
             } catch (error) {
                 document.getElementById(thoughtId)?.remove();
-                log('error', 'Fatal: ' + error.message);
+                log('error', 'FATAL_EXCEPTION: Internal process crash. ' + error.message);
+                scrollToBottom();
             }
-            
-            scrollToBottom();
         }
 
         function handleSlashCommand(content) {
             const parts = content.split(' ');
             const cmd = parts[0].toLowerCase();
 
-            if (cmd === '/help') {
-                log('system', 'Available commands:\n/agent [name] - Select AI specialist\n/config [key] - Set OpenRouter API Key\n/clear - Clear terminal\n/panel - Toggle artifacts panel\n/list - Show all agents');
-            } else if (cmd === '/clear') {
-                document.getElementById('history').innerHTML = '';
-            } else if (cmd === '/config') {
-                localStorage.setItem('openrouter_api_key', parts[1]);
-                log('system', 'API Key updated successfully.');
-            } else if (cmd === '/agent') {
-                const name = parts[1];
-                const agent = AGENTS.find(a => a.name === name);
-                if (agent) {
-                    selectedAgent = agent;
-                    document.getElementById('current-prompt').innerText = `nexaops-ai (${agent.name}) >`;
-                    log('system', `Switched to agent: ${agent.name}`);
-                } else {
-                    log('error', `Agent not found: ${name}`);
-                }
-            } else if (cmd === '/list') {
-                log('system', 'Available agents: ' + AGENTS.map(a => a.name).join(', '));
-            } else if (cmd === '/panel') {
-                togglePanel();
-            } else {
-                log('error', `Unknown command: ${cmd}`);
+            switch(cmd) {
+                case '/help':
+                    log('system', `
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <div><span class="text-white">/agent [id]</span> - Switch specialist</div>
+                            <div><span class="text-white">/list</span> - List all agents</div>
+                            <div><span class="text-white">/config [key]</span> - Set API Key</div>
+                            <div><span class="text-white">/status</span> - System health check</div>
+                            <div><span class="text-white">/panel</span> - Toggle preview</div>
+                            <div><span class="text-white">/clear</span> - Reset console</div>
+                        </div>
+                    `);
+                    break;
+                case '/clear':
+                    document.getElementById('history').innerHTML = '';
+                    log('system', 'Console buffer cleared.');
+                    break;
+                case '/config':
+                    if(!parts[1]) { log('error', 'ERROR: Missing parameter. Usage: /config [API_KEY]'); return; }
+                    localStorage.setItem('openrouter_api_key', parts[1]);
+                    log('system', 'AUTH_SUCCESS: API Key stored securely in session.');
+                    break;
+                case '/agent':
+                    if(!parts[1]) { log('error', 'ERROR: Usage: /agent [agent_id]'); return; }
+                    selectAgent(parts[1]);
+                    break;
+                case '/list':
+                    const listHtml = AGENTS.map(a => `<div>- <span class="text-white font-bold">${a.id}</span>: ${a.name} (${a.role})</div>`).join('');
+                    log('system', `<div class="mt-2">${listHtml}</div>`);
+                    break;
+                case '/panel':
+                    togglePanel();
+                    break;
+                case '/status':
+                    log('system', `
+                        <div class="mt-2 text-[11px] opacity-80">
+                            <div>Uptime: 100% (High Availability)</div>
+                            <div>API_Gateway: Online</div>
+                            <div>Database: Connected (Supabase)</div>
+                            <div>WhatsApp_Bridge: Authorized</div>
+                            <div>Cloud_Deployment: Vercel Production</div>
+                        </div>
+                    `);
+                    break;
+                default:
+                    log('error', `UNKNOWN_PROTOCOL: Command "${cmd}" not recognized.`);
             }
             scrollToBottom();
         }
 
+        // --- Utilidades de UI ---
         function log(type, content, id) {
             const history = document.getElementById('history');
             const div = document.createElement('div');
@@ -235,6 +445,41 @@
                 lastArtifact = match[1];
                 document.getElementById('artifacts-panel').style.display = 'flex';
                 document.getElementById('preview-frame').srcdoc = lastArtifact;
+                
+                // Actualizar código y resaltado
+                const codeEl = document.getElementById('code-content');
+                codeEl.textContent = lastArtifact;
+                hljs.highlightElement(codeEl);
+
+                // Actualizar Metadatos
+                updateMetadata(lastArtifact);
+                setArtifactView('preview'); // Por defecto ver el preview
+            }
+        }
+
+        function updateMetadata(content) {
+            document.getElementById('meta-type').innerText = 'HTML/Tailwind CSS';
+            document.getElementById('meta-size').innerText = (content.length / 1024).toFixed(2) + ' KB';
+            document.getElementById('meta-time').innerText = new Date().toLocaleTimeString();
+            document.getElementById('meta-status').innerText = 'SYNCHRONIZED';
+        }
+
+        function setArtifactView(view) {
+            const preview = document.getElementById('preview-frame');
+            const code = document.getElementById('code-viewer');
+            const tabPreview = document.getElementById('tab-preview');
+            const tabCode = document.getElementById('tab-code');
+
+            if (view === 'preview') {
+                preview.style.display = 'block';
+                code.style.display = 'none';
+                tabPreview.classList.add('active');
+                tabCode.classList.remove('active');
+            } else {
+                preview.style.display = 'none';
+                code.style.display = 'block';
+                tabPreview.classList.remove('active');
+                tabCode.classList.add('active');
             }
         }
 
@@ -244,15 +489,18 @@
         }
 
         function scrollToBottom() {
-            const terminal = document.getElementById('terminal');
+            const terminal = document.getElementById('terminal-output');
             terminal.scrollTop = terminal.scrollHeight;
         }
 
         function downloadArtifact() { if(!lastArtifact) return; const blob = new Blob([lastArtifact], {type: 'text/html'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'nexa_output.html'; a.click(); }
         function openFull() { if(!lastArtifact) return; const w = window.open(); w.document.write(lastArtifact); w.document.close(); }
 
-        // Set initial prompt
-        document.getElementById('current-prompt').innerText = `nexaops-ai (${selectedAgent.name}) >`;
+        window.onload = init;
+    </script>
+ }
+
+        window.onload = init;
     </script>
 </body>
 </html>

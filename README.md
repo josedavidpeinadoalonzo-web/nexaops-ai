@@ -1,28 +1,55 @@
-# NexaOps AI - Enlaces de Acceso Rápido
+# 🌌 NexaOps AI - Ecosystem
 
-Aquí tienes documentado lo que tienes actualmente desplegado en la nube, así como los enlaces a tus portales locales para que siempre los tengas a mano.
+![NexaOps AI Banner](./public/assets/nexaops_banner.png)
 
-## ☁️ Servicios Desplegados en la Nube (Vercel)
-
-Actualmente solo tienes desplegado el **Backend (API)** en Vercel. Este servicio es el corazón del sistema, ya que guarda tus configuraciones, agentes y datos de forma centralizada.
-
-* **URL Base de la API**: [https://api-virid-six-51.vercel.app](https://api-virid-six-51.vercel.app)
-* **Endpoint Principal**: [https://api-virid-six-51.vercel.app/api](https://api-virid-six-51.vercel.app/api)
-
-*(Tanto el Dashboard como el Agent Portal ya están configurados internamente para apuntar a esta URL).*
+Bienvenido al centro de comando de **NexaOps AI**. Este repositorio centraliza la infraestructura de una agencia de IA de alto rendimiento, conectando agentes inteligentes, gestión de clientes y automatización de WhatsApp.
 
 ---
 
-## 💻 Portales Locales (Interfaces de Usuario)
+## 🚀 Acceso Rápido (Cloud & Local)
 
-Estas son las interfaces visuales de tu proyecto. Actualmente corren en tu computadora local. Para abrirlas, simplemente haz doble clic en los archivos HTML o ábrelos con un servidor local (Live Server):
+### ☁️ Servicios en la Nube
+El cerebro del sistema está desplegado en **Vercel**, gestionando la lógica de negocio y las integraciones.
 
-* **🤖 Agent Portal**: `c:\Users\HOME\jarvis-system\nexaops-ai\agent-portal\index.html`
-  *(Tu interfaz tipo Claude donde creas interfaces y hablas con la IA)*
-* **📊 Dashboard**: `c:\Users\HOME\jarvis-system\nexaops-ai\dashboard\index.html`
-  *(Tu panel de control para administrar proyectos, tareas y clientes)*
+*   **🌐 API Central**: [https://api-virid-six-51.vercel.app](https://api-virid-six-51.vercel.app)
+*   **🔌 Health Check**: [https://api-virid-six-51.vercel.app/api/whatsapp/health](https://api-virid-six-51.vercel.app/api/whatsapp/health)
+
+### 💻 Portales Locales (Interfaces)
+Para ejecutar estas interfaces, puedes abrirlas directamente desde tu explorador o usar un servidor local (Live Server).
+
+*   **🤖 Agent Portal**: [Abrir Portal de Agentes](./agent-portal/index.html)
+    *   *Interfaz inspirada en Claude para creación y despliegue de agentes.*
+*   **📊 Business Dashboard**: [Abrir Panel de Control](./dashboard/index.html)
+    *   *Gestión centralizada de proyectos, leads y facturación.*
 
 ---
 
-### Notas para el futuro:
-Si decides desplegar también el **Agent Portal** o el **Dashboard** a la web (usando Vercel, Netlify o GitHub Pages), puedes actualizar este documento para añadir esos enlaces públicos aquí.
+## 🛠️ Stack Tecnológico
+
+| Capa | Tecnología | Función |
+| :--- | :--- | :--- |
+| **Backend** | Node.js / Express | Lógica de servidor y Webhooks. |
+| **Frontend** | Vanilla JS / Tailwind | Interfaces ultra-rápidas y premium. |
+| **Database** | Supabase (PostgreSQL) | Persistencia de datos y autenticación. |
+| **WhatsApp** | Green API | Comunicación estable para el mercado LATAM. |
+| **Hosting** | Vercel | Despliegue continuo y escalabilidad. |
+
+---
+
+## 📂 Estructura del Proyecto
+
+*   `api/`: Servidor central y lógica de integraciones.
+*   `agent-portal/`: Interfaz de interacción con IA.
+*   `dashboard/`: Panel administrativo de la agencia.
+*   `agents/`: Definiciones y lógica de agentes específicos.
+*   `public/`: Assets estáticos y recursos globales.
+
+---
+
+## 📝 Notas de Desarrollo
+- El sistema utiliza **Green API** para evitar bloqueos regionales en Venezuela.
+- Todas las variables de entorno críticas se gestionan en Vercel y archivos `.env` locales.
+- Para sincronizar cambios con producción: `git push origin main`.
+
+---
+*Desarrollado con ❤️ por el equipo de NexaOps AI.*
